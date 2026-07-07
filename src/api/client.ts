@@ -31,6 +31,7 @@ export const tezgahApi = {
 
 // Çözgü
 export const cozguApi = {
+  listAll: () => req<Cozgu[]>("cozgu", "GET"),
   listByTezgah: (tezgahId: string) =>
     req<Cozgu[]>(`cozgu?tezgahId=${tezgahId}`, "GET"),
   get: (id: string) => req<Cozgu>(`cozgu?id=${id}`, "GET"),
@@ -42,6 +43,7 @@ export const cozguApi = {
 
 // Numune
 export const numuneApi = {
+  listAll: () => req<Numune[]>("numune", "GET"),
   listByCozgu: (cozguId: string) =>
     req<Numune[]>(`numune?cozguId=${cozguId}`, "GET"),
   get: (id: string) => req<Numune>(`numune?id=${id}`, "GET"),

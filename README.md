@@ -30,13 +30,22 @@ npx netlify-cli dev       # functions + frontend → http://localhost:8888
 ilkesi). Yerelde functions'ı çalıştırmak için `npx netlify-cli dev` yeterli.
 Salt frontend için `npm run dev:vite` (functions proxy'si 8888'e gider).
 
-## Faz 1 kapsamı
+## Kapsam
 
+**Faz 1 — çekirdek değer**
 - `ndp_tezgah` · `ndp_cozgu` (renk dizimi dahil) · `ndp_numune` CRUD
-- Tezgah 1─N Çözgü 1─N Numune drill-down
+- Tezgah 1─N Çözgü 1─N Numune drill-down ("Liste" sekmesi)
 - Canlı **metraj bütçesi göstergesi** (`Σ tahmini_boy_m ≤ cozgu_boyu_m`)
 
-Faz 2 (kanban planlama panosu) ve Faz 3 (kısıt zekâsı, WeaveX import) sonraki adımlar.
+**Faz 2 — planlama** ("Pano" sekmesi)
+- Ortak **tezgah-şerit panosu** (kanban): tezgah kolonları, çözgü kartları,
+  numune satırları, çözgü başına mini metraj göstergesi
+- Taşıma/sıralama: sürükle-bırak (masaüstü) + ok butonları ve "taşı" (tablet)
+- **Durum yaşam döngüsü:** taslak→onaylı→sırada→dokunuyor→dokundu→değerlendirme→tamam,
+  iptal/geri al
+- **Taslak havuz ↔ kesin kuyruk** görsel ayrımı (onayla → dondur 🔒)
+
+Faz 3 (kısıt zekâsı: çerçeve/tahar/mekik doğrulama, WeaveX import) sonraki adım.
 
 ## Altın Kural
 

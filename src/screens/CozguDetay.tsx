@@ -87,7 +87,7 @@ export function CozguDetay({ cozguId, onGeri }: Props) {
   return (
     <div>
       <div className="crumbs">
-        <button onClick={onGeri}>← Tezgah</button>
+        <button onClick={onGeri}>← Geri</button>
         <span>/</span>
         <strong>{cozgu?.adKod ?? "…"}</strong>
       </div>
