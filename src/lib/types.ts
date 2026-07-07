@@ -63,7 +63,7 @@ export interface Numune {
   atkiIplikleri: unknown | null;
   atkiSikligi: string | null;
   orguSnapshotId: string | null;
-  atkiRenkDizisi: unknown | null;
+  atkiRenkDizisi: string[] | null; // kullanılan atkı renkleri (hex) — mekik kontrolü
   tahminiBoyM: string | null;
   durum: string;
   argeTalepKodu: string | null;
@@ -72,4 +72,17 @@ export interface Numune {
   siraNo: number;
   notlar: string | null;
   createdAt: string;
+}
+
+// Desen uygulamasından import edilen örgü KOPYASI (immutable, Altın Kural §3).
+export interface OrguSnapshot {
+  id: string;
+  kaynak: string | null;
+  kaynakId: string | null;
+  kaynakVersiyon: string | null;
+  cerceveSayisi: number | null;
+  taharTipi: string | null;
+  weavexJson: unknown | null; // ham WeaveX blob
+  ad: string | null;
+  olusturmaTs: string;
 }

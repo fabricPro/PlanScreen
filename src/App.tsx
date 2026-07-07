@@ -3,6 +3,7 @@ import { Pano } from "./screens/Pano";
 import { TezgahListe } from "./screens/TezgahListe";
 import { TezgahDetay } from "./screens/TezgahDetay";
 import { CozguDetay } from "./screens/CozguDetay";
+import { OrguImport } from "./screens/OrguImport";
 
 // Gezinme:
 // - "pano": ortak tezgah-şerit panosu (Faz 2 ana ekran)
@@ -11,19 +12,25 @@ import { CozguDetay } from "./screens/CozguDetay";
 type Gorunum =
   | { ad: "pano" }
   | { ad: "liste" }
+  | { ad: "orguler" }
   | { ad: "tezgah"; tezgahId: string }
   | { ad: "cozgu"; cozguId: string; geri: "pano" | "tezgah"; tezgahId?: string };
 
 export default function App() {
   const [gorunum, setGorunum] = useState<Gorunum>({ ad: "pano" });
 
-  const sekme = gorunum.ad === "pano" ? "pano" : "liste";
+  const sekme =
+    gorunum.ad === "pano"
+      ? "pano"
+      : gorunum.ad === "orguler"
+        ? "orguler"
+        : "liste";
 
   return (
     <>
       <header className="app">
         <h1>NDP</h1>
-        <small>Numune Dokuma Planlama · Faz 2</small>
+        <small>Numune Dokuma Planlama · Faz 3</small>
       </header>
 
       <nav className="tabs">
@@ -39,7 +46,15 @@ export default function App() {
         >
           Liste
         </button>
+        <button
+          className={sekme === "orguler" ? "aktif" : ""}
+          onClick={() => setGorunum({ ad: "orguler" })}
+        >
+          Örgüler
+        </button>
       </nav>
+
+      {gorunum.ad === "orguler" && <OrguImport />}
 
       {gorunum.ad === "pano" && (
         <Pano

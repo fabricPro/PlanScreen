@@ -45,7 +45,15 @@ Salt frontend için `npm run dev:vite` (functions proxy'si 8888'e gider).
   iptal/geri al
 - **Taslak havuz ↔ kesin kuyruk** görsel ayrımı (onayla → dondur 🔒)
 
-Faz 3 (kısıt zekâsı: çerçeve/tahar/mekik doğrulama, WeaveX import) sonraki adım.
+**Faz 3 — akıl** ("Örgüler" sekmesi + anlık uyarılar)
+- **Kısıt doğrulama** (`src/lib/kisitlar.ts`, okuma anında): çerçeve zinciri
+  (§6.1), mekik/atkı renk sayısı (§6.2), tahar uyumu (§6.3). İhlal **uyarır,
+  engellemez** (Anayasa 1).
+- **WeaveX örgü import** → `ndp_orgu_snapshot` (doğrula → `kaynak`+`kaynak_versiyon`
+  damgasıyla immutable kopya); numuneye örgü snapshot bağlama + atkı renk editörü.
+- Uyarılar çözgü detayında satır satır, panoda ⚠ göstergesi olarak anlık.
+
+Çözgü değişim optimizasyonu (§9 ops.) sonraki tura bırakıldı.
 
 ## Altın Kural
 

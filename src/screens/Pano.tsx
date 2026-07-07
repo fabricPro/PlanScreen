@@ -1,7 +1,13 @@
-import { useEffect, useState } from "react";
-import { cozguApi, numuneApi, tezgahApi } from "../api/client";
-import type { Cozgu, Numune, Tezgah } from "../lib/types";
+import { useEffect, useMemo, useState } from "react";
+import {
+  cozguApi,
+  numuneApi,
+  orguSnapshotApi,
+  tezgahApi,
+} from "../api/client";
+import type { Cozgu, Numune, OrguSnapshot, Tezgah } from "../lib/types";
 import { hesaplaMetraj } from "../lib/metraj";
+import { numuneKisitlari, uyariSayisi } from "../lib/kisitlar";
 import {
   durumRengi,
   isKesin,
@@ -27,20 +33,23 @@ export function Pano({ onCozguAc }: Props) {
   const [tezgahlar, setTezgahlar] = useState<Tezgah[]>([]);
   const [cozguler, setCozguler] = useState<Cozgu[]>([]);
   const [numuneler, setNumuneler] = useState<Numune[]>([]);
+  const [snapshotlar, setSnapshotlar] = useState<OrguSnapshot[]>([]);
   const [hata, setHata] = useState<string | null>(null);
   const [suru, setSuru] = useState<Suru>(null);
   const [hedef, setHedef] = useState<string | null>(null); // vurgulanan drop hedefi
 
   async function yukle() {
     try {
-      const [t, c, n] = await Promise.all([
+      const [t, c, n, s] = await Promise.all([
         tezgahApi.list(),
         cozguApi.listAll(),
         numuneApi.listAll(),
+        orguSnapshotApi.listAll(),
       ]);
       setTezgahlar(t);
       setCozguler(c);
       setNumuneler(n);
+      setSnapshotlar(s);
       setHata(null);
     } catch (e) {
       setHata((e as Error).message);
@@ -50,6 +59,20 @@ export function Pano({ onCozguAc }: Props) {
   useEffect(() => {
     yukle();
   }, []);
+
+  const snapshotHaritasi = useMemo(() => {
+    const m = new Map<string, OrguSnapshot>();
+    snapshotlar.forEach((s) => m.set(s.id, s));
+    return m;
+  }, [snapshotlar]);
+
+  // Bir numunenin kısıt uyarı sayısı (⚠ göstergesi için).
+  function numuneUyari(t: Tezgah, c: Cozgu, n: Numune): number {
+    const snap = n.orguSnapshotId
+      ? (snapshotHaritasi.get(n.orguSnapshotId) ?? null)
+      : null;
+    return uyariSayisi(numuneKisitlari(t, c, n, snap));
+  }
 
   function cozgulerinTezgahi(tezgahId: string): Cozgu[] {
     return cozguler
@@ -276,6 +299,7 @@ export function Pano({ onCozguAc }: Props) {
                         <NumuneSatir
                           key={n.id}
                           n={n}
+                          uyari={numuneUyari(t, c, n)}
                           onSira={(d) => numuneSirala(c.id, n.id, d)}
                           onDurum={(hd) => durumDegistir(n, hd)}
                           onSuruBasla={() => setSuru({ tip: "numune", id: n.id })}
@@ -297,6 +321,7 @@ export function Pano({ onCozguAc }: Props) {
                         <NumuneSatir
                           key={n.id}
                           n={n}
+                          uyari={numuneUyari(t, c, n)}
                           onSira={(d) => numuneSirala(c.id, n.id, d)}
                           onDurum={(hd) => durumDegistir(n, hd)}
                           onSuruBasla={() => setSuru({ tip: "numune", id: n.id })}
@@ -313,6 +338,7 @@ export function Pano({ onCozguAc }: Props) {
                     <NumuneSatir
                       key={n.id}
                       n={n}
+                      uyari={numuneUyari(t, c, n)}
                       onSira={(d) => numuneSirala(c.id, n.id, d)}
                       onDurum={(hd) => durumDegistir(n, hd)}
                       onSuruBasla={() => setSuru({ tip: "numune", id: n.id })}
@@ -335,12 +361,14 @@ export function Pano({ onCozguAc }: Props) {
 // Tek numune satırı: durum noktası, ad, sıra okları, durum ilerlet/geri, onayla/iptal.
 function NumuneSatir({
   n,
+  uyari = 0,
   onSira,
   onDurum,
   onSuruBasla,
   onSuruBitir,
 }: {
   n: Numune;
+  uyari?: number;
   onSira: (dir: -1 | 1) => void;
   onDurum: (hedefDurum: string | null) => void;
   onSuruBasla: () => void;
@@ -366,6 +394,15 @@ function NumuneSatir({
         title={n.durum}
       />
       <span className="ad" title={n.adKod}>
+        {uyari > 0 && (
+          <span
+            className="hata"
+            title={`${uyari} kısıt uyarısı`}
+            style={{ marginRight: 3 }}
+          >
+            ⚠
+          </span>
+        )}
         {n.adKod}
         {n.tahminiBoyM ? ` · ${n.tahminiBoyM}m` : ""}
       </span>

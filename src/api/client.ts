@@ -1,4 +1,5 @@
-import type { Cozgu, Numune, Tezgah } from "../lib/types";
+import type { Cozgu, Numune, OrguSnapshot, Tezgah } from "../lib/types";
+import type { WeaveXSnapshotGirdi } from "../lib/weavex";
 
 const BASE = "/.netlify/functions";
 
@@ -51,4 +52,14 @@ export const numuneApi = {
   update: (id: string, b: Partial<Numune>) =>
     req<Numune>(`numune?id=${id}`, "PUT", b),
   remove: (id: string) => req<{ silindi: string }>(`numune?id=${id}`, "DELETE"),
+};
+
+// Örgü snapshot (immutable import — PUT yok)
+export const orguSnapshotApi = {
+  listAll: () => req<OrguSnapshot[]>("orgu_snapshot", "GET"),
+  get: (id: string) => req<OrguSnapshot>(`orgu_snapshot?id=${id}`, "GET"),
+  create: (b: WeaveXSnapshotGirdi) =>
+    req<OrguSnapshot>("orgu_snapshot", "POST", b),
+  remove: (id: string) =>
+    req<{ silindi: string }>(`orgu_snapshot?id=${id}`, "DELETE"),
 };

@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { cozguApi, numuneApi } from "../api/client";
-import type { Cozgu, Numune, RenkBlok } from "../lib/types";
+import { cozguApi, numuneApi, orguSnapshotApi, tezgahApi } from "../api/client";
+import type { Cozgu, Numune, OrguSnapshot, RenkBlok, Tezgah } from "../lib/types";
 import { NUMUNE_DURUMLARI } from "../lib/types";
 import { hesaplaMetraj } from "../lib/metraj";
+import { numuneKisitlari } from "../lib/kisitlar";
 import { MetrajBar } from "./MetrajBar";
 import { RenkDizimiEditor } from "./RenkDizimiEditor";
+import { AtkiRenkEditor } from "./AtkiRenkEditor";
+import { KisitUyari } from "./KisitUyari";
 
 interface Props {
   cozguId: string;
@@ -16,6 +19,8 @@ const bosNumune: Partial<Numune> = {
   tahminiBoyM: "",
   atkiSikligi: "",
   durum: "taslak",
+  orguSnapshotId: null,
+  atkiRenkDizisi: [],
   argeTalepKodu: "",
   argeTalepUrl: "",
   fasIlhamUrl: "",
@@ -23,7 +28,9 @@ const bosNumune: Partial<Numune> = {
 
 export function CozguDetay({ cozguId, onGeri }: Props) {
   const [cozgu, setCozgu] = useState<Cozgu | null>(null);
+  const [tezgah, setTezgah] = useState<Tezgah | null>(null);
   const [numuneler, setNumuneler] = useState<Numune[]>([]);
+  const [snapshotlar, setSnapshotlar] = useState<OrguSnapshot[]>([]);
   const [renkDizimi, setRenkDizimi] = useState<RenkBlok[]>([]);
   const [renkKaydedildi, setRenkKaydedildi] = useState(false);
   const [numForm, setNumForm] = useState<Partial<Numune>>(bosNumune);
@@ -32,13 +39,17 @@ export function CozguDetay({ cozguId, onGeri }: Props) {
 
   async function yukle() {
     try {
-      const [c, ns] = await Promise.all([
-        cozguApi.get(cozguId),
+      const c = await cozguApi.get(cozguId);
+      const [t, ns, ss] = await Promise.all([
+        tezgahApi.get(c.tezgahId),
         numuneApi.listByCozgu(cozguId),
+        orguSnapshotApi.listAll(),
       ]);
       setCozgu(c);
+      setTezgah(t);
       setRenkDizimi(Array.isArray(c.renkDizimi) ? c.renkDizimi : []);
       setNumuneler(ns);
+      setSnapshotlar(ss);
       setHata(null);
     } catch (e) {
       setHata((e as Error).message);
@@ -53,6 +64,26 @@ export function CozguDetay({ cozguId, onGeri }: Props) {
     () => hesaplaMetraj(cozgu?.cozguBoyuM, numuneler),
     [cozgu?.cozguBoyuM, numuneler],
   );
+
+  const snapshotHaritasi = useMemo(() => {
+    const m = new Map<string, OrguSnapshot>();
+    snapshotlar.forEach((s) => m.set(s.id, s));
+    return m;
+  }, [snapshotlar]);
+
+  // Formdaki numune için anlık kısıt önizlemesi.
+  const formKisitlari = useMemo(() => {
+    if (!tezgah || !cozgu) return [];
+    const onizleme = {
+      ...bosNumune,
+      ...numForm,
+      atkiRenkDizisi: numForm.atkiRenkDizisi ?? [],
+    } as Numune;
+    const snap = numForm.orguSnapshotId
+      ? (snapshotHaritasi.get(numForm.orguSnapshotId) ?? null)
+      : null;
+    return numuneKisitlari(tezgah, cozgu, onizleme, snap);
+  }, [tezgah, cozgu, numForm, snapshotHaritasi]);
 
   async function renkKaydet() {
     try {
@@ -98,6 +129,7 @@ export function CozguDetay({ cozguId, onGeri }: Props) {
         <div className="panel">
           <h3>Çözgü {cozgu.adKod}</h3>
           <div className="meta mut">
+            {tezgah ? `${tezgah.ad} · ` : ""}
             {cozgu.cozguBoyuM ? `${cozgu.cozguBoyuM} m boy` : "boy —"} ·{" "}
             {cozgu.taharTipi ?? "—"} tahar ·{" "}
             {cozgu.cerceveKullanim ?? "—"} çerçeve
@@ -127,37 +159,57 @@ export function CozguDetay({ cozguId, onGeri }: Props) {
           <p className="mut">Bu çözgüde henüz numune yok.</p>
         ) : (
           <div className="row">
-            {numuneler.map((n) => (
-              <div key={n.id} className="card" style={{ cursor: "default" }}>
-                <div className="kod">{n.adKod}</div>
-                <div className="meta">
-                  {n.tahminiBoyM ? `${n.tahminiBoyM} m` : "boy —"} ·{" "}
-                  <span className="badge">{n.durum}</span>
-                </div>
-                {(n.argeTalepUrl || n.fasIlhamUrl) && (
+            {numuneler.map((n) => {
+              const snap = n.orguSnapshotId
+                ? (snapshotHaritasi.get(n.orguSnapshotId) ?? null)
+                : null;
+              const kisitlar =
+                tezgah && cozgu
+                  ? numuneKisitlari(tezgah, cozgu, n, snap)
+                  : [];
+              return (
+                <div key={n.id} className="card" style={{ cursor: "default" }}>
+                  <div className="kod">{n.adKod}</div>
                   <div className="meta">
-                    {n.argeTalepUrl && (
-                      <a href={n.argeTalepUrl} target="_blank" rel="noreferrer">
-                        ARGE talep
-                      </a>
-                    )}{" "}
-                    {n.fasIlhamUrl && (
-                      <a href={n.fasIlhamUrl} target="_blank" rel="noreferrer">
-                        FAS ilham
-                      </a>
+                    {n.tahminiBoyM ? `${n.tahminiBoyM} m` : "boy —"} ·{" "}
+                    <span className="badge">{n.durum}</span>
+                    {snap && (
+                      <>
+                        {" · "}
+                        <span className="badge">örgü: {snap.ad ?? "—"}</span>
+                      </>
                     )}
                   </div>
-                )}
-                <div className="actions">
-                  <button
-                    className="danger small"
-                    onClick={() => numuneSil(n.id)}
-                  >
-                    Sil
-                  </button>
+                  {(n.argeTalepUrl || n.fasIlhamUrl) && (
+                    <div className="meta">
+                      {n.argeTalepUrl && (
+                        <a
+                          href={n.argeTalepUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          ARGE talep
+                        </a>
+                      )}{" "}
+                      {n.fasIlhamUrl && (
+                        <a href={n.fasIlhamUrl} target="_blank" rel="noreferrer">
+                          FAS ilham
+                        </a>
+                      )}
+                    </div>
+                  )}
+                  <KisitUyari sonuclar={kisitlar} />
+                  <div className="actions">
+                    <button
+                      className="danger small"
+                      onClick={() => numuneSil(n.id)}
+                    >
+                      Sil
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -211,6 +263,37 @@ export function CozguDetay({ cozguId, onGeri }: Props) {
               </select>
             </div>
             <div>
+              <label>Örgü (import edilmiş snapshot)</label>
+              <select
+                value={numForm.orguSnapshotId ?? ""}
+                onChange={(e) =>
+                  setNumForm({
+                    ...numForm,
+                    orguSnapshotId: e.target.value || null,
+                  })
+                }
+              >
+                <option value="">— yok —</option>
+                {snapshotlar.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.ad ?? s.id} ({s.cerceveSayisi ?? "?"}çrç, {s.taharTipi})
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div style={{ marginTop: 8 }}>
+            <label>Atkı renkleri (mekik kontrolü)</label>
+            <AtkiRenkEditor
+              renkler={numForm.atkiRenkDizisi ?? []}
+              onChange={(r) => setNumForm({ ...numForm, atkiRenkDizisi: r })}
+              mekikSayisi={tezgah?.mekikSayisi}
+            />
+          </div>
+
+          <div className="grid2" style={{ marginTop: 8 }}>
+            <div>
               <label>ARGE talep kodu (dış ref.)</label>
               <input
                 value={numForm.argeTalepKodu ?? ""}
@@ -238,6 +321,10 @@ export function CozguDetay({ cozguId, onGeri }: Props) {
               />
             </div>
           </div>
+
+          {/* Anlık kısıt uyarıları (§7.3) */}
+          <KisitUyari sonuclar={formKisitlari} detay />
+
           <div className="actions">
             <button className="primary" onClick={numuneKaydet}>
               Kaydet
