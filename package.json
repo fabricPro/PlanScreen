@@ -12,6 +12,7 @@
     "typecheck": "tsc -b --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
+    "db:migrate:http": "node scripts/apply-migration.mjs",
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {

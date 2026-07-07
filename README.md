@@ -19,7 +19,10 @@ Detaylı spesifikasyon için [`CLAUDE.md`](./CLAUDE.md).
 npm install
 cp .env.example .env      # DATABASE_URL'i Neon bağlantı dizesiyle doldurun
 npm run db:generate       # şemadan SQL migration üretir (offline)
-npm run db:migrate        # migration'ı Neon'a uygular (DATABASE_URL ister)
+npm run db:migrate        # migration'ı Neon'a uygular (WebSocket; DATABASE_URL ister)
+# Proxy/egress WebSocket'i engelliyorsa HTTP driver ile uygulayın:
+npm run db:migrate:http   # aynı migration'ı Neon HTTP driver ile uygular
+# ...veya drizzle/*.sql içeriğini Neon panosundaki SQL Editor'e yapıştırın.
 npx netlify-cli dev       # functions + frontend → http://localhost:8888
 ```
 
