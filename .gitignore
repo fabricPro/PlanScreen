@@ -5,4 +5,5 @@ dist
 .netlify
 *.log
 *.tsbuildinfo
+scripts/*.png
 .DS_Store
