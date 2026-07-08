@@ -5,6 +5,7 @@ import { TezgahDetay } from "./screens/TezgahDetay";
 import { CozguDetay } from "./screens/CozguDetay";
 import { OrguImport } from "./screens/OrguImport";
 import { GorevPano } from "./screens/GorevPano";
+import { Cizelge } from "./screens/Cizelge";
 
 // Gezinme:
 // - "pano": ortak tezgah-şerit panosu (Faz 2 ana ekran)
@@ -12,6 +13,7 @@ import { GorevPano } from "./screens/GorevPano";
 // Çözgü detayına hem panodan hem listeden gidilebilir.
 type Gorunum =
   | { ad: "pano" }
+  | { ad: "cizelge" }
   | { ad: "liste" }
   | { ad: "orguler" }
   | { ad: "gorevler" }
@@ -30,11 +32,13 @@ export default function App() {
   const sekme =
     gorunum.ad === "pano"
       ? "pano"
-      : gorunum.ad === "orguler"
-        ? "orguler"
-        : gorunum.ad === "gorevler"
-          ? "gorevler"
-          : "liste";
+      : gorunum.ad === "cizelge"
+        ? "cizelge"
+        : gorunum.ad === "orguler"
+          ? "orguler"
+          : gorunum.ad === "gorevler"
+            ? "gorevler"
+            : "liste";
 
   return (
     <>
@@ -49,6 +53,12 @@ export default function App() {
           onClick={() => setGorunum({ ad: "pano" })}
         >
           Pano
+        </button>
+        <button
+          className={sekme === "cizelge" ? "aktif" : ""}
+          onClick={() => setGorunum({ ad: "cizelge" })}
+        >
+          Çizelge
         </button>
         <button
           className={sekme === "liste" ? "aktif" : ""}
@@ -72,6 +82,14 @@ export default function App() {
 
       {gorunum.ad === "gorevler" && <GorevPano />}
       {gorunum.ad === "orguler" && <OrguImport />}
+
+      {gorunum.ad === "cizelge" && (
+        <Cizelge
+          onCozguAc={(cozguId) =>
+            setGorunum({ ad: "cozgu", cozguId, geri: "pano" })
+          }
+        />
+      )}
 
       {gorunum.ad === "pano" && (
         <Pano

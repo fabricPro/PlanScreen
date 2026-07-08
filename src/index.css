@@ -962,6 +962,226 @@ select.tasi {
   margin-bottom: 4px;
 }
 
+/* ---------- Çizelge (metre eksenli Gantt) ---------- */
+.cizelge-arac {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.cizelge-arac input[type="range"] {
+  width: 160px;
+  accent-color: var(--primary);
+}
+.cizelge-arac button {
+  padding: 4px 11px;
+  min-width: 0;
+}
+.cizelge-lejant {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+.cizelge-lejant i {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  display: inline-block;
+  margin-left: 8px;
+}
+
+.cizelge-sar {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+.cizelge-icerik {
+  min-width: 100%;
+  width: max-content;
+  padding-bottom: 8px;
+}
+
+/* Cetvel (metre tikleri) */
+.cizelge-cetvel {
+  display: flex;
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  height: 26px;
+}
+.cetvel-bos {
+  flex: 0 0 190px;
+  position: sticky;
+  left: 0;
+  z-index: 7;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+}
+.cetvel-track {
+  position: relative;
+  flex: 0 0 auto;
+}
+.cetvel-tik {
+  position: absolute;
+  top: 5px;
+  font-size: 0.68rem;
+  color: var(--muted);
+  transform: translateX(-1px);
+  border-left: 1px solid var(--border);
+  padding-left: 3px;
+  height: 16px;
+  white-space: nowrap;
+}
+
+/* Tezgah grubu */
+.cizelge-grup {
+  border-bottom: 1px solid var(--border);
+}
+.cizelge-grup:nth-child(even) {
+  background: color-mix(in srgb, var(--surface-2) 45%, transparent);
+}
+.grup-baslik {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  position: sticky;
+  left: 0;
+  z-index: 5;
+  padding: 7px 12px;
+  width: max-content;
+  min-width: 100%;
+}
+.grup-ad {
+  font-weight: 750;
+  font-size: 0.92rem;
+}
+
+/* Çözgü şeridi */
+.cizelge-lane {
+  display: flex;
+  align-items: stretch;
+  border-top: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
+}
+.lane-etiket {
+  flex: 0 0 190px;
+  position: sticky;
+  left: 0;
+  z-index: 4;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 5px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  cursor: pointer;
+  overflow: hidden;
+}
+.cizelge-grup:nth-child(even) .lane-etiket,
+.cizelge-grup:nth-child(even) .cetvel-bos {
+  background: color-mix(in srgb, var(--surface-2) 45%, var(--surface));
+}
+.lane-etiket:hover .lane-kod {
+  color: var(--primary);
+}
+.lane-kod {
+  font-weight: 650;
+  font-size: 0.84rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lane-alt {
+  font-size: 0.72rem;
+}
+.lane-track {
+  position: relative;
+  flex: 0 0 auto;
+  height: 40px;
+  margin: 3px 0;
+  /* Silik dikey metre gridline'ları (her tik adımında) */
+  background-image: repeating-linear-gradient(
+    to right,
+    transparent 0,
+    transparent calc(var(--adim, 80px) - 1px),
+    color-mix(in srgb, var(--border) 60%, transparent) calc(var(--adim, 80px) - 1px),
+    color-mix(in srgb, var(--border) 60%, transparent) var(--adim, 80px)
+  );
+  border-radius: 6px;
+}
+.lane-butce {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 2px;
+  background: var(--border-strong);
+  z-index: 3;
+}
+.lane-asim {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  border-radius: 0 6px 6px 0;
+  background: repeating-linear-gradient(
+    45deg,
+    color-mix(in srgb, var(--warn) 22%, transparent) 0,
+    color-mix(in srgb, var(--warn) 22%, transparent) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+}
+.lane-bos {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  padding-left: 6px;
+  font-size: 0.68rem;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--surface-3) 60%, transparent);
+  border-radius: 5px;
+}
+.is-emri {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  padding: 0 5px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  color: #fff;
+  cursor: pointer;
+  overflow: hidden;
+  transition: filter 0.1s ease, transform 0.05s ease;
+}
+.is-emri:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  z-index: 3;
+}
+.is-emri-et {
+  font-size: 0.72rem;
+  font-weight: 650;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
+}
+
 /* ---------- Pano araç çubuğu / tezgah sürükle / katlama ---------- */
 .pano-arac {
   display: flex;
