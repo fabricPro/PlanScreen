@@ -190,17 +190,65 @@ export function Pano({ onCozguAc }: Props) {
     });
   }
 
+  function tezgahYenidenAdlandir(t: Tezgah, x: number, y: number) {
+    setHizli({
+      x,
+      y,
+      baslik: "Tezgahı yeniden adlandır",
+      alanlar: [{ ad: "ad", etiket: "Tezgah adı", varsayilan: t.ad }],
+      onKaydet: (d) => {
+        if (d.ad?.trim()) calis(() => tezgahApi.update(t.id, { ad: d.ad.trim() }));
+        setHizli(null);
+      },
+    });
+  }
+
+  function tezgahSil(t: Tezgah) {
+    if (
+      !window.confirm(
+        `"${t.ad}" tezgahı silinsin mi?\nBu tezgahın TÜM çözgüleri, numuneleri ve iplik havuzu da silinir. Geri alınamaz.`,
+      )
+    )
+      return;
+    calis(() => tezgahApi.remove(t.id));
+  }
+
+  function cozguSil(c: Cozgu) {
+    if (
+      !window.confirm(
+        `"${c.adKod}" çözgüsü silinsin mi?\nBu çözgünün tüm numuneleri de silinir. Geri alınamaz.`,
+      )
+    )
+      return;
+    calis(() => cozguApi.remove(c.id));
+  }
+
+  function numuneSil(n: Numune) {
+    if (!window.confirm(`"${n.adKod}" numunesi silinsin mi? Geri alınamaz.`))
+      return;
+    calis(() => numuneApi.remove(n.id));
+  }
+
   function tezgahMenu(t: Tezgah, e: React.MouseEvent) {
     e.preventDefault();
     setMenu({
       x: e.clientX,
       y: e.clientY,
       ogeler: [
-        { etiket: "+ Çözgü ekle", onSec: () => hizliCozgu(t.id, e.clientX, e.clientY) },
+        {
+          etiket: "+ Hızlı çözgü",
+          onSec: () => hizliCozgu(t.id, e.clientX, e.clientY),
+        },
         {
           etiket: "+ Havuza iplik ekle",
           onSec: () => hizliIplik(t.id, e.clientX, e.clientY),
         },
+        {
+          etiket: "Tezgahı yeniden adlandır",
+          ayrac: true,
+          onSec: () => tezgahYenidenAdlandir(t, e.clientX, e.clientY),
+        },
+        { etiket: "Tezgahı sil", tehlike: true, onSec: () => tezgahSil(t) },
       ],
     });
   }
@@ -220,8 +268,24 @@ export function Pano({ onCozguAc }: Props) {
           etiket: c.durum === "aktif" ? "Pasifleştir" : "Aktif yap (tezgahta)",
           onSec: () => aktifToggle(c),
         },
-        { etiket: "Çözgüyü aç", onSec: () => onCozguAc(c.id), ayrac: true },
+        { etiket: "Çözgüyü aç", onSec: () => onCozguAc(c.id) },
+        {
+          etiket: "Çözgüyü sil",
+          tehlike: true,
+          ayrac: true,
+          onSec: () => cozguSil(c),
+        },
       ],
+    });
+  }
+
+  function numuneMenu(n: Numune, e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    setMenu({
+      x: e.clientX,
+      y: e.clientY,
+      ogeler: [{ etiket: "Numune sil", tehlike: true, onSec: () => numuneSil(n) }],
     });
   }
 
@@ -484,6 +548,7 @@ export function Pano({ onCozguAc }: Props) {
                           key={n.id}
                           n={n}
                           uyari={numuneUyari(t, c, n)}
+                          onMenu={(e) => numuneMenu(n, e)}
                           onSira={(d) => numuneSirala(c.id, n.id, d)}
                           onDurum={(hd) => durumDegistir(n, hd)}
                           onSuruBasla={() => setSuru({ tip: "numune", id: n.id })}
@@ -506,6 +571,7 @@ export function Pano({ onCozguAc }: Props) {
                           key={n.id}
                           n={n}
                           uyari={numuneUyari(t, c, n)}
+                          onMenu={(e) => numuneMenu(n, e)}
                           onSira={(d) => numuneSirala(c.id, n.id, d)}
                           onDurum={(hd) => durumDegistir(n, hd)}
                           onSuruBasla={() => setSuru({ tip: "numune", id: n.id })}
@@ -523,6 +589,7 @@ export function Pano({ onCozguAc }: Props) {
                       key={n.id}
                       n={n}
                       uyari={numuneUyari(t, c, n)}
+                      onMenu={(e) => numuneMenu(n, e)}
                       onSira={(d) => numuneSirala(c.id, n.id, d)}
                       onDurum={(hd) => durumDegistir(n, hd)}
                       onSuruBasla={() => setSuru({ tip: "numune", id: n.id })}
@@ -565,6 +632,7 @@ export function Pano({ onCozguAc }: Props) {
 function NumuneSatir({
   n,
   uyari = 0,
+  onMenu,
   onSira,
   onDurum,
   onSuruBasla,
@@ -572,6 +640,7 @@ function NumuneSatir({
 }: {
   n: Numune;
   uyari?: number;
+  onMenu: (e: React.MouseEvent) => void;
   onSira: (dir: -1 | 1) => void;
   onDurum: (hedefDurum: string | null) => void;
   onSuruBasla: () => void;
@@ -585,6 +654,7 @@ function NumuneSatir({
     <div
       className="numune-satir"
       draggable
+      onContextMenu={onMenu}
       onDragStart={(e) => {
         e.stopPropagation();
         onSuruBasla();
