@@ -1,13 +1,15 @@
 import { eq } from "drizzle-orm";
-import { db } from "../../src/db/client";
-import { ndpNumune } from "../../src/db/schema";
-import { govde, hata, idParam, json } from "./_shared";
-import type { YeniNumune } from "../../src/db/schema";
+import { db } from "../src/db/client";
+import { ndpNumune } from "../src/db/schema";
+import { govde, hata, idParam, json } from "../src/server/http";
+import type { YeniNumune } from "../src/db/schema";
+
+export const config = { runtime: "edge" };
 
 // CRUD: ndp_numune (bir çözgüye bağlı = 1 kumaş)
-// GET /numune                → tümü
-// GET /numune?id=..          → tek
-// GET /numune?cozguId=..     → çözgüye ait numuneler (sira_no sırasıyla)
+// GET /api/numune                → tümü
+// GET /api/numune?id=..          → tek
+// GET /api/numune?cozguId=..     → çözgüye ait numuneler (sira_no sırasıyla)
 // POST / PUT?id / DELETE?id
 export default async (req: Request): Promise<Response> => {
   try {

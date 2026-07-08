@@ -52,7 +52,7 @@ const browser = await chromium.launch({
 });
 const page = await browser.newPage({ viewport: { width: 1100, height: 900 } });
 
-await page.route("**/.netlify/functions/**", (route) => {
+await page.route("**/api/**", (route) => {
   const u = new URL(route.request().url());
   route.fulfill({
     contentType: "application/json",

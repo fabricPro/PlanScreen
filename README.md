@@ -10,7 +10,7 @@ Detaylı spesifikasyon için [`CLAUDE.md`](./CLAUDE.md).
 
 - React + Vite + TypeScript (tablet-first)
 - Neon (Postgres) · Drizzle ORM · `@neondatabase/serverless`
-- Netlify Functions (serverless API) + Netlify deploy
+- Vercel Edge Functions (`/api`, serverless API) + Vercel deploy
 - Tablo prefix: `ndp_` (izole)
 
 ## Kurulum
@@ -23,12 +23,20 @@ npm run db:migrate        # migration'ı Neon'a uygular (WebSocket; DATABASE_URL
 # Proxy/egress WebSocket'i engelliyorsa HTTP driver ile uygulayın:
 npm run db:migrate:http   # aynı migration'ı Neon HTTP driver ile uygular
 # ...veya drizzle/*.sql içeriğini Neon panosundaki SQL Editor'e yapıştırın.
-npx netlify-cli dev       # functions + frontend → http://localhost:8888
+npx vercel dev            # /api function'ları + frontend → http://localhost:3000
 ```
 
-`netlify-cli` bilinçli olarak bağımlılık listesinde değil (ağır; hafif kur
-ilkesi). Yerelde functions'ı çalıştırmak için `npx netlify-cli dev` yeterli.
-Salt frontend için `npm run dev:vite` (functions proxy'si 8888'e gider).
+Salt frontend için `npm run dev:vite` (/api istekleri `vercel dev` portu 3000'e
+proxy'lenir).
+
+## Deploy (Vercel)
+
+1. **vercel.com** → New Project → GitHub reposunu import et (framework: Vite
+   otomatik algılanır; `vercel.json` build/output ve SPA rewrite'ı içerir).
+2. **Environment Variables** → `DATABASE_URL` = Neon pooled connection string.
+   `/api` Edge function'ları bunu `process.env` üzerinden okur (tarayıcıya sızmaz).
+3. Deploy. `/api/*` uçları Neon'a Edge'den `@neondatabase/serverless` (HTTP) ile
+   bağlanır — şema Neon'da zaten hazır, migration gerekmez.
 
 ## Kapsam
 

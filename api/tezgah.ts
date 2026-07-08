@@ -1,15 +1,18 @@
 import { eq } from "drizzle-orm";
-import { db } from "../../src/db/client";
-import { ndpTezgah } from "../../src/db/schema";
-import { govde, hata, idParam, json } from "./_shared";
-import type { YeniTezgah } from "../../src/db/schema";
+import { db } from "../src/db/client";
+import { ndpTezgah } from "../src/db/schema";
+import { govde, hata, idParam, json } from "../src/server/http";
+import type { YeniTezgah } from "../src/db/schema";
+
+// Vercel Edge Function — Web standardı Request→Response.
+export const config = { runtime: "edge" };
 
 // CRUD: ndp_tezgah
-// GET /tezgah            → tümü
-// GET /tezgah?id=..      → tek
-// POST /tezgah           → oluştur
-// PUT /tezgah?id=..      → güncelle
-// DELETE /tezgah?id=..   → sil
+// GET /api/tezgah          → tümü
+// GET /api/tezgah?id=..    → tek
+// POST /api/tezgah         → oluştur
+// PUT /api/tezgah?id=..    → güncelle
+// DELETE /api/tezgah?id=.. → sil
 export default async (req: Request): Promise<Response> => {
   try {
     const id = idParam(req);

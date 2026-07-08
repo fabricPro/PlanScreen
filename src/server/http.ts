@@ -1,5 +1,6 @@
-// Netlify Functions v2 için ortak JSON yardımcıları.
+// Sunucu (Vercel /api Edge) için ortak JSON yardımcıları.
 // Altın Kural §3: bu handler'lar YALNIZ NDP'nin kendi Neon DB'sine bağlanır.
+// src/api altında DEĞİL, src/server altında — /api routing'iyle karışmaması için.
 
 export function json(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {

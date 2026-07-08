@@ -5,7 +5,7 @@
   "type": "module",
   "description": "NDP — Numune Dokuma Planlama (planlama/çizelge aracı)",
   "scripts": {
-    "dev": "netlify dev",
+    "dev": "vercel dev",
     "dev:vite": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
@@ -22,7 +22,6 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@netlify/functions": "^2.8.2",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",

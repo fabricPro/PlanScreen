@@ -1,7 +1,7 @@
 import type { Cozgu, Numune, OrguSnapshot, Tezgah } from "../lib/types";
 import type { WeaveXSnapshotGirdi } from "../lib/weavex";
 
-const BASE = "/.netlify/functions";
+const BASE = "/api";
 
 async function req<T>(
   path: string,

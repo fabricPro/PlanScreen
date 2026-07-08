@@ -1,13 +1,15 @@
 import { eq } from "drizzle-orm";
-import { db } from "../../src/db/client";
-import { ndpCozgu } from "../../src/db/schema";
-import { govde, hata, idParam, json } from "./_shared";
-import type { YeniCozgu } from "../../src/db/schema";
+import { db } from "../src/db/client";
+import { ndpCozgu } from "../src/db/schema";
+import { govde, hata, idParam, json } from "../src/server/http";
+import type { YeniCozgu } from "../src/db/schema";
+
+export const config = { runtime: "edge" };
 
 // CRUD: ndp_cozgu (bir tezgaha bağlı)
-// GET /cozgu                → tümü
-// GET /cozgu?id=..          → tek
-// GET /cozgu?tezgahId=..    → tezgaha ait çözgüler (tezgah_sira sırasıyla)
+// GET /api/cozgu                → tümü
+// GET /api/cozgu?id=..          → tek
+// GET /api/cozgu?tezgahId=..    → tezgaha ait çözgüler (tezgah_sira sırasıyla)
 // POST / PUT?id / DELETE?id
 export default async (req: Request): Promise<Response> => {
   try {

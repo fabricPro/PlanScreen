@@ -1,12 +1,12 @@
 import { eq } from "drizzle-orm";
-import { db } from "../../src/db/client";
-import { ndpOrguSnapshot } from "../../src/db/schema";
-import { govde, hata, idParam, json } from "./_shared";
+import { db } from "../src/db/client";
+import { ndpOrguSnapshot } from "../src/db/schema";
+import { govde, hata, idParam, json } from "../src/server/http";
+
+export const config = { runtime: "edge" };
 
 // ndp_orgu_snapshot — desen uygulamasından import edilen KOPYA (Altın Kural §3).
-// Immutable: GET + POST + DELETE var, PUT YOK (kayıt düzenlenmez, yeni versiyon = yeni kayıt).
-// POST gövdesi zaten doğrulanmış (frontend parseWeaveX ile) kolon alanlarını taşır.
-
+// Immutable: GET + POST + DELETE var, PUT YOK (kayıt düzenlenmez).
 type YeniSnapshot = typeof ndpOrguSnapshot.$inferInsert;
 
 export default async (req: Request): Promise<Response> => {
