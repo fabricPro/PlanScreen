@@ -23,6 +23,7 @@ export function TezgahDetay({ tezgahId, onGeri, onCozguAc }: Props) {
   const [cozguler, setCozguler] = useState<Cozgu[]>([]);
   const [form, setForm] = useState<Partial<Cozgu>>(bosCozgu);
   const [ekleAcik, setEkleAcik] = useState(false);
+  const [sekme, setSekme] = useState<"cozguler" | "iplikler">("cozguler");
   const [hata, setHata] = useState<string | null>(null);
 
   async function yukle() {
@@ -120,8 +121,25 @@ export function TezgahDetay({ tezgahId, onGeri, onCozguAc }: Props) {
         </div>
       )}
 
-      {tezgah && <IplikHavuzu tezgahId={tezgahId} />}
+      <nav className="tabs">
+        <button
+          className={sekme === "cozguler" ? "aktif" : ""}
+          onClick={() => setSekme("cozguler")}
+        >
+          Çözgüler ({cozguler.length})
+        </button>
+        <button
+          className={sekme === "iplikler" ? "aktif" : ""}
+          onClick={() => setSekme("iplikler")}
+        >
+          Denenebilecek İplikler
+        </button>
+      </nav>
 
+      {sekme === "iplikler" && tezgah && <IplikHavuzu tezgahId={tezgahId} />}
+
+      {sekme === "cozguler" && (
+      <>
       <div className="panel">
         <h3>Çözgüler ({cozguler.length})</h3>
         {cozguler.length === 0 ? (
@@ -249,6 +267,8 @@ export function TezgahDetay({ tezgahId, onGeri, onCozguAc }: Props) {
         <button className="primary" onClick={() => setEkleAcik(true)}>
           + Çözgü ekle
         </button>
+      )}
+      </>
       )}
     </div>
   );

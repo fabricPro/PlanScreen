@@ -24,7 +24,7 @@ import { HizliForm } from "./HizliForm";
 import type { HizliAlan } from "./HizliForm";
 
 interface Props {
-  onCozguAc: (cozguId: string) => void;
+  onCozguAc: (cozguId: string, duzenleNumuneId?: string) => void;
 }
 
 type Suru =
@@ -268,7 +268,7 @@ export function Pano({ onCozguAc }: Props) {
           etiket: c.durum === "aktif" ? "Pasifleştir" : "Aktif yap (tezgahta)",
           onSec: () => aktifToggle(c),
         },
-        { etiket: "Çözgüyü aç", onSec: () => onCozguAc(c.id) },
+        { etiket: "Çözgüyü aç / düzenle", onSec: () => onCozguAc(c.id) },
         {
           etiket: "Çözgüyü sil",
           tehlike: true,
@@ -285,7 +285,18 @@ export function Pano({ onCozguAc }: Props) {
     setMenu({
       x: e.clientX,
       y: e.clientY,
-      ogeler: [{ etiket: "Numune sil", tehlike: true, onSec: () => numuneSil(n) }],
+      ogeler: [
+        {
+          etiket: "Numune düzenle / iplik ata",
+          onSec: () => onCozguAc(n.cozguId, n.id),
+        },
+        {
+          etiket: "Numune sil",
+          tehlike: true,
+          ayrac: true,
+          onSec: () => numuneSil(n),
+        },
+      ],
     });
   }
 

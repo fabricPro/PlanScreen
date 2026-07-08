@@ -14,7 +14,13 @@ type Gorunum =
   | { ad: "liste" }
   | { ad: "orguler" }
   | { ad: "tezgah"; tezgahId: string }
-  | { ad: "cozgu"; cozguId: string; geri: "pano" | "tezgah"; tezgahId?: string };
+  | {
+      ad: "cozgu";
+      cozguId: string;
+      geri: "pano" | "tezgah";
+      tezgahId?: string;
+      duzenleNumuneId?: string;
+    };
 
 export default function App() {
   const [gorunum, setGorunum] = useState<Gorunum>({ ad: "pano" });
@@ -58,8 +64,8 @@ export default function App() {
 
       {gorunum.ad === "pano" && (
         <Pano
-          onCozguAc={(cozguId) =>
-            setGorunum({ ad: "cozgu", cozguId, geri: "pano" })
+          onCozguAc={(cozguId, duzenleNumuneId) =>
+            setGorunum({ ad: "cozgu", cozguId, geri: "pano", duzenleNumuneId })
           }
         />
       )}
@@ -88,6 +94,7 @@ export default function App() {
       {gorunum.ad === "cozgu" && (
         <CozguDetay
           cozguId={gorunum.cozguId}
+          duzenleNumuneId={gorunum.duzenleNumuneId}
           onGeri={() =>
             gorunum.geri === "tezgah" && gorunum.tezgahId
               ? setGorunum({ ad: "tezgah", tezgahId: gorunum.tezgahId })
