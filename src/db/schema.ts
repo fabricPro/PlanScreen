@@ -128,6 +128,8 @@ export const ndpNumune = pgTable("ndp_numune", {
   argeTalepUrl: text("arge_talep_url"),
   fasIlhamUrl: text("fas_ilham_url"),
   siraNo: integer("sira_no").notNull().default(0), // çözgü içi dokuma sırası
+  varyantSayisi: integer("varyant_sayisi").notNull().default(0), // planlanan varyant adedi
+  aciklama: text("aciklama"), // biçimli (mini-markdown) serbest açıklama
   notlar: text("notlar"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()

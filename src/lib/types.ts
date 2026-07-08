@@ -105,6 +105,8 @@ export interface Numune {
   argeTalepUrl: string | null;
   fasIlhamUrl: string | null;
   siraNo: number;
+  varyantSayisi: number; // planlanan varyant adedi
+  aciklama: string | null; // biçimli (mini-markdown) serbest açıklama
   notlar: string | null;
   createdAt: string;
 }

@@ -29,6 +29,13 @@
       "when": 1783520421786,
       "tag": "0003_fat_proudstar",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1783522944980,
+      "tag": "0004_numune_varyant_aciklama",
+      "breakpoints": true
     }
   ]
 }

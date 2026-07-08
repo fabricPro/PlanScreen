@@ -30,6 +30,8 @@ import { BaglamMenu } from "./BaglamMenu";
 import type { MenuOge } from "./BaglamMenu";
 import { HizliForm } from "./HizliForm";
 import type { HizliAlan } from "./HizliForm";
+import { NumuneDetay } from "./NumuneDetay";
+import { formatlaAciklama } from "../lib/aciklama";
 
 interface Props {
   onCozguAc: (cozguId: string, duzenleNumuneId?: string) => void;
@@ -77,6 +79,16 @@ export function Pano({ onCozguAc }: Props) {
   const [menu, setMenu] = useState<MenuDurum>(null);
   const [hizli, setHizli] = useState<HizliDurum>(null);
   const [acikCozguler, setAcikCozguler] = useState<Set<string>>(new Set());
+  const [numuneDetay, setNumuneDetay] = useState<{
+    numune: Numune;
+    x: number;
+    y: number;
+  } | null>(null);
+  const [ipucu, setIpucu] = useState<{
+    numune: Numune;
+    x: number;
+    y: number;
+  } | null>(null);
 
   function cozguToggleAc(id: string) {
     setAcikCozguler((prev) => {
@@ -420,15 +432,48 @@ export function Pano({ onCozguAc }: Props) {
     });
   }
 
+  function varyantBelirle(n: Numune, x: number, y: number) {
+    setHizli({
+      x,
+      y,
+      baslik: "Varyant sayısı",
+      alanlar: [
+        {
+          ad: "varyant",
+          etiket: "Kaç varyant planlanıyor?",
+          tip: "number",
+          varsayilan: String(n.varyantSayisi ?? 0),
+        },
+      ],
+      onKaydet: (d) => {
+        calis(() =>
+          numuneApi.update(n.id, { varyantSayisi: Number(d.varyant) || 0 }),
+        );
+        setHizli(null);
+      },
+    });
+  }
+
   function numuneMenu(n: Numune, e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
+    const x = e.clientX;
+    const y = e.clientY;
     setMenu({
-      x: e.clientX,
-      y: e.clientY,
+      x,
+      y,
       ogeler: [
         {
+          etiket: "Detay / düzenle (bu sayfada)",
+          onSec: () => setNumuneDetay({ numune: n, x, y }),
+        },
+        {
+          etiket: "Varyant sayısı belirle",
+          onSec: () => varyantBelirle(n, x, y),
+        },
+        {
           etiket: "Numune düzenle / iplik ata",
+          ayrac: true,
           onSec: () => onCozguAc(n.cozguId, n.id),
         },
         {
@@ -439,6 +484,29 @@ export function Pano({ onCozguAc }: Props) {
         },
       ],
     });
+  }
+
+  // Bir numune satırını (ipucu/menü/sıra kablolamasıyla) çizer.
+  function numuneSatiri(t: Tezgah, c: Cozgu, n: Numune) {
+    return (
+      <NumuneSatir
+        key={n.id}
+        n={n}
+        uyari={numuneUyari(t, c, n)}
+        onMenu={(e) => numuneMenu(n, e)}
+        onSira={(d) => numuneSirala(c.id, n.id, d)}
+        onDurum={(hd) => durumDegistir(n, hd)}
+        onSuruBasla={() => setSuru({ tip: "numune", id: n.id })}
+        onSuruBitir={() => {
+          setSuru(null);
+          setHedef(null);
+        }}
+        onIpucu={(e) =>
+          setIpucu({ numune: n, x: e.clientX, y: e.clientY })
+        }
+        onIpucuKapa={() => setIpucu(null)}
+      />
+    );
   }
 
   function cozgulerinTezgahi(tezgahId: string): Cozgu[] {
@@ -773,21 +841,7 @@ export function Pano({ onCozguAc }: Props) {
                   {taslaklar.length > 0 && (
                     <>
                       <div className="havuz-etiket">Taslak havuz</div>
-                      {taslaklar.map((n) => (
-                        <NumuneSatir
-                          key={n.id}
-                          n={n}
-                          uyari={numuneUyari(t, c, n)}
-                          onMenu={(e) => numuneMenu(n, e)}
-                          onSira={(d) => numuneSirala(c.id, n.id, d)}
-                          onDurum={(hd) => durumDegistir(n, hd)}
-                          onSuruBasla={() => setSuru({ tip: "numune", id: n.id })}
-                          onSuruBitir={() => {
-                            setSuru(null);
-                            setHedef(null);
-                          }}
-                        />
-                      ))}
+                      {taslaklar.map((n) => numuneSatiri(t, c, n))}
                     </>
                   )}
 
@@ -796,39 +850,11 @@ export function Pano({ onCozguAc }: Props) {
                       <div className="havuz-etiket">
                         Kesin kuyruk <span className="kilit">🔒</span>
                       </div>
-                      {kesinler.map((n) => (
-                        <NumuneSatir
-                          key={n.id}
-                          n={n}
-                          uyari={numuneUyari(t, c, n)}
-                          onMenu={(e) => numuneMenu(n, e)}
-                          onSira={(d) => numuneSirala(c.id, n.id, d)}
-                          onDurum={(hd) => durumDegistir(n, hd)}
-                          onSuruBasla={() => setSuru({ tip: "numune", id: n.id })}
-                          onSuruBitir={() => {
-                            setSuru(null);
-                            setHedef(null);
-                          }}
-                        />
-                      ))}
+                      {kesinler.map((n) => numuneSatiri(t, c, n))}
                     </>
                   )}
 
-                  {iptaller.map((n) => (
-                    <NumuneSatir
-                      key={n.id}
-                      n={n}
-                      uyari={numuneUyari(t, c, n)}
-                      onMenu={(e) => numuneMenu(n, e)}
-                      onSira={(d) => numuneSirala(c.id, n.id, d)}
-                      onDurum={(hd) => durumDegistir(n, hd)}
-                      onSuruBasla={() => setSuru({ tip: "numune", id: n.id })}
-                      onSuruBitir={() => {
-                        setSuru(null);
-                        setHedef(null);
-                      }}
-                    />
-                  ))}
+                  {iptaller.map((n) => numuneSatiri(t, c, n))}
                   </>
                   )}
                 </div>
@@ -856,6 +882,29 @@ export function Pano({ onCozguAc }: Props) {
           onKapat={() => setHizli(null)}
         />
       )}
+      {numuneDetay && (
+        <NumuneDetay
+          numune={numuneDetay.numune}
+          x={numuneDetay.x}
+          y={numuneDetay.y}
+          onKapat={() => setNumuneDetay(null)}
+          onKaydedildi={yukle}
+        />
+      )}
+      {ipucu && (
+        <div
+          className="numune-ipucu"
+          style={{
+            left: Math.min(ipucu.x + 14, window.innerWidth - 340),
+            top: Math.min(ipucu.y + 12, window.innerHeight - 220),
+          }}
+        >
+          <div className="ipucu-baslik">{ipucu.numune.adKod}</div>
+          <div className="bicimli">
+            {formatlaAciklama(ipucu.numune.aciklama)}
+          </div>
+        </div>
+      )}
       </div>
     </>
   );
@@ -870,6 +919,8 @@ function NumuneSatir({
   onDurum,
   onSuruBasla,
   onSuruBitir,
+  onIpucu,
+  onIpucuKapa,
 }: {
   n: Numune;
   uyari?: number;
@@ -878,18 +929,26 @@ function NumuneSatir({
   onDurum: (hedefDurum: string | null) => void;
   onSuruBasla: () => void;
   onSuruBitir: () => void;
+  onIpucu: (e: React.MouseEvent) => void;
+  onIpucuKapa: () => void;
 }) {
   const sonra = sonrakiDurum(n.durum);
   const once = oncekiDurum(n.durum);
   const iptalDurumu = n.durum === "iptal";
+  const aciklamaVar = !!(n.aciklama && n.aciklama.trim());
 
   return (
     <div
       className="numune-satir"
       draggable
       onContextMenu={onMenu}
+      onMouseEnter={(e) => {
+        if (aciklamaVar) onIpucu(e);
+      }}
+      onMouseLeave={onIpucuKapa}
       onDragStart={(e) => {
         e.stopPropagation();
+        onIpucuKapa();
         onSuruBasla();
       }}
       onDragEnd={onSuruBitir}
@@ -911,6 +970,16 @@ function NumuneSatir({
         )}
         {n.adKod}
         {n.tahminiBoyM ? ` · ${n.tahminiBoyM}m` : ""}
+        {n.varyantSayisi > 0 && (
+          <span className="varyant-rozet" title={`${n.varyantSayisi} varyant planlandı`}>
+            ⎇ {n.varyantSayisi}
+          </span>
+        )}
+        {aciklamaVar && (
+          <span className="aciklama-im" title="Açıklama var (üzerine gelin)">
+            ✎
+          </span>
+        )}
       </span>
       <span className="mini-araclar">
         <button title="Yukarı" onClick={() => onSira(-1)}>

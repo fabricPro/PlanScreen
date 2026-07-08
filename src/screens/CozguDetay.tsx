@@ -21,6 +21,8 @@ import { numuneKisitlari } from "../lib/kisitlar";
 import { MetrajBar } from "./MetrajBar";
 import { RenkDizimiEditor } from "./RenkDizimiEditor";
 import { KisitUyari } from "./KisitUyari";
+import { AciklamaEditor } from "./AciklamaEditor";
+import { formatlaAciklama } from "../lib/aciklama";
 
 interface Props {
   cozguId: string;
@@ -41,6 +43,8 @@ const bosNumune: Partial<Numune> = {
   argeTalepKodu: "",
   argeTalepUrl: "",
   fasIlhamUrl: "",
+  varyantSayisi: 0,
+  aciklama: "",
 };
 
 // Seçilen ipliklerin renklerinden atkı renk dizisini türet (mekik kontrolü girdisi).
@@ -205,6 +209,8 @@ export function CozguDetay({ cozguId, duzenleNumuneId, onGeri }: Props) {
       argeTalepKodu: n.argeTalepKodu ?? "",
       argeTalepUrl: n.argeTalepUrl ?? "",
       fasIlhamUrl: n.fasIlhamUrl ?? "",
+      varyantSayisi: n.varyantSayisi ?? 0,
+      aciklama: n.aciklama ?? "",
     });
     setEkleAcik(true);
   }
@@ -391,6 +397,14 @@ export function CozguDetay({ cozguId, duzenleNumuneId, onGeri }: Props) {
                   <div className="meta">
                     {n.tahminiBoyM ? `${n.tahminiBoyM} m` : "boy —"} ·{" "}
                     <span className="badge">{n.durum}</span>
+                    {n.varyantSayisi > 0 && (
+                      <>
+                        {" · "}
+                        <span className="badge" title="Planlanan varyant">
+                          ⎇ {n.varyantSayisi} varyant
+                        </span>
+                      </>
+                    )}
                     {snap && (
                       <>
                         {" · "}
@@ -398,6 +412,12 @@ export function CozguDetay({ cozguId, duzenleNumuneId, onGeri }: Props) {
                       </>
                     )}
                   </div>
+
+                  {n.aciklama && n.aciklama.trim() && (
+                    <div className="bicimli kart-aciklama">
+                      {formatlaAciklama(n.aciklama)}
+                    </div>
+                  )}
 
                   {/* Atanan iplikler — numunenin altında */}
                   {atkilar.length > 0 && (
@@ -584,6 +604,28 @@ export function CozguDetay({ cozguId, duzenleNumuneId, onGeri }: Props) {
                 }
               />
             </div>
+            <div>
+              <label>Varyant sayısı</label>
+              <input
+                type="number"
+                min={0}
+                value={numForm.varyantSayisi ?? 0}
+                onChange={(e) =>
+                  setNumForm({
+                    ...numForm,
+                    varyantSayisi: Number(e.target.value) || 0,
+                  })
+                }
+              />
+            </div>
+          </div>
+
+          <div style={{ marginTop: 8 }}>
+            <label>Açıklama</label>
+            <AciklamaEditor
+              value={numForm.aciklama ?? ""}
+              onChange={(v) => setNumForm({ ...numForm, aciklama: v })}
+            />
           </div>
 
           <KisitUyari sonuclar={formKisitlari} detay />

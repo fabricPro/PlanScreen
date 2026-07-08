@@ -34,8 +34,11 @@ export const IFADELER = [
     "atki_sikligi" numeric, "orgu_snapshot_id" uuid, "atki_renk_dizisi" jsonb,
     "tahmini_boy_m" numeric, "durum" text DEFAULT 'taslak' NOT NULL,
     "arge_talep_kodu" text, "arge_talep_url" text, "fas_ilham_url" text,
-    "sira_no" integer DEFAULT 0 NOT NULL, "notlar" text,
+    "sira_no" integer DEFAULT 0 NOT NULL,
+    "varyant_sayisi" integer DEFAULT 0 NOT NULL, "aciklama" text, "notlar" text,
     "created_at" timestamp with time zone DEFAULT now() NOT NULL)`,
+  `ALTER TABLE "ndp_numune" ADD COLUMN IF NOT EXISTS "varyant_sayisi" integer DEFAULT 0 NOT NULL`,
+  `ALTER TABLE "ndp_numune" ADD COLUMN IF NOT EXISTS "aciklama" text`,
   `CREATE TABLE IF NOT EXISTS "ndp_iplik" (
     "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
     "tezgah_id" uuid NOT NULL, "ad" text NOT NULL, "tip" text, "renk" text,
