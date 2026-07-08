@@ -42,7 +42,7 @@ export default async (req: Request): Promise<Response> => {
       }
       case "POST": {
         const body = await govde<YeniGorev>(req);
-        if (!body.tezgahId) return hata("'tezgahId' zorunlu");
+        // tezgah/numune bağı opsiyonel; yalnız başlık zorunlu.
         if (!body.baslik?.trim()) return hata("'baslik' zorunlu");
         const [row] = await db.insert(ndpGorev).values(body).returning();
         return json(row, 201);

@@ -92,15 +92,21 @@ export const ndpIplik = pgTable("ndp_iplik", {
     .defaultNow(),
 });
 
-// Tezgaha ait yapılacaklar (to-do) — çok seviyeli (parent_id self-ref).
+// Yapılacaklar (to-do) — çok seviyeli (parent_id self-ref).
+// tezgah/numune bağı OPSİYONEL; son tarih + öncelik ile normal to-do.
 export const ndpGorev = pgTable("ndp_gorev", {
   id: uuid("id").primaryKey().defaultRandom(),
-  tezgahId: uuid("tezgah_id")
-    .notNull()
-    .references(() => ndpTezgah.id, { onDelete: "cascade" }),
+  tezgahId: uuid("tezgah_id").references(() => ndpTezgah.id, {
+    onDelete: "cascade",
+  }), // opsiyonel bağ
+  numuneId: uuid("numune_id").references(() => ndpNumune.id, {
+    onDelete: "set null",
+  }), // opsiyonel bağ (silinince kopar)
   parentId: uuid("parent_id"), // self-ref (alt görev); FK migration'da eklenir
   baslik: text("baslik").notNull(),
   tamamlandi: boolean("tamamlandi").notNull().default(false),
+  sonTarih: timestamp("son_tarih", { withTimezone: true }), // termin
+  oncelik: integer("oncelik").notNull().default(1), // 0 düşük · 1 normal · 2 yüksek
   sira: integer("sira").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()

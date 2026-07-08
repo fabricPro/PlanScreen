@@ -4,7 +4,7 @@ import { TezgahListe } from "./screens/TezgahListe";
 import { TezgahDetay } from "./screens/TezgahDetay";
 import { CozguDetay } from "./screens/CozguDetay";
 import { OrguImport } from "./screens/OrguImport";
-import { GorevPano } from "./screens/GorevPano";
+import { Gorevler } from "./screens/Gorevler";
 import { Cizelge } from "./screens/Cizelge";
 
 // Gezinme:
@@ -80,7 +80,13 @@ export default function App() {
         </button>
       </nav>
 
-      {gorunum.ad === "gorevler" && <GorevPano />}
+      {gorunum.ad === "gorevler" && (
+        <Gorevler
+          onAc={(cozguId) =>
+            setGorunum({ ad: "cozgu", cozguId, geri: "pano" })
+          }
+        />
+      )}
       {gorunum.ad === "orguler" && <OrguImport />}
 
       {gorunum.ad === "cizelge" && (

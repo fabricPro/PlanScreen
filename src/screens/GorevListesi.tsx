@@ -1,17 +1,29 @@
-import { useEffect, useState } from "react";
-import { gorevApi } from "../api/client";
-import type { Gorev } from "../lib/types";
+import { useEffect, useMemo, useState } from "react";
+import { cozguApi, gorevApi, numuneApi, tezgahApi } from "../api/client";
+import type { Cozgu, Gorev, Numune, Tezgah } from "../lib/types";
 import { GorevAgaci } from "./GorevAgaci";
 
 // Bir tezgahın görev (to-do) listesi — tezgah detayındaki "Görevler" sekmesi.
 export function GorevListesi({ tezgahId }: { tezgahId: string }) {
   const [gorevler, setGorevler] = useState<Gorev[]>([]);
+  const [tezgahlar, setTezgahlar] = useState<Tezgah[]>([]);
+  const [cozguler, setCozguler] = useState<Cozgu[]>([]);
+  const [numuneler, setNumuneler] = useState<Numune[]>([]);
   const [kokMetin, setKokMetin] = useState("");
   const [hata, setHata] = useState<string | null>(null);
 
   async function yukle() {
     try {
-      setGorevler(await gorevApi.listByTezgah(tezgahId));
+      const [g, t, c, n] = await Promise.all([
+        gorevApi.listByTezgah(tezgahId),
+        tezgahApi.list(),
+        cozguApi.listAll(),
+        numuneApi.listAll(),
+      ]);
+      setGorevler(g);
+      setTezgahlar(t);
+      setCozguler(c);
+      setNumuneler(n);
       setHata(null);
     } catch (e) {
       setHata((e as Error).message);
@@ -21,6 +33,16 @@ export function GorevListesi({ tezgahId }: { tezgahId: string }) {
   useEffect(() => {
     yukle();
   }, [tezgahId]);
+
+  const cozguTezgah = useMemo(() => {
+    const m = new Map<string, string>();
+    cozguler.forEach((c) => m.set(c.id, c.tezgahId));
+    return m;
+  }, [cozguler]);
+  const numuneTezgahId = (numuneId: string) => {
+    const n = numuneler.find((x) => x.id === numuneId);
+    return n ? cozguTezgah.get(n.cozguId) ?? null : null;
+  };
 
   async function kokEkle() {
     if (!kokMetin.trim()) return;
@@ -57,7 +79,9 @@ export function GorevListesi({ tezgahId }: { tezgahId: string }) {
         <GorevAgaci
           gorevler={gorevler}
           parentId={null}
-          tezgahId={tezgahId}
+          tezgahlar={tezgahlar}
+          numuneler={numuneler}
+          numuneTezgahId={numuneTezgahId}
           onDegisti={yukle}
         />
       )}

@@ -49,16 +49,26 @@ export interface AtkiIplikRef {
   renk: string; // hex
 }
 
-// Tezgaha ait yapılacak (to-do) — çok seviyeli (parentId self-ref).
+// Yapılacak (to-do) — çok seviyeli; tezgah/numune bağı opsiyonel.
 export interface Gorev {
   id: string;
-  tezgahId: string;
+  tezgahId: string | null; // opsiyonel bağ
+  numuneId: string | null; // opsiyonel bağ
   parentId: string | null;
   baslik: string;
   tamamlandi: boolean;
+  sonTarih: string | null; // termin (ISO)
+  oncelik: number; // 0 düşük · 1 normal · 2 yüksek
   sira: number;
   createdAt: string;
 }
+
+// Görev önceliği — etiket + renk (küçük yardımcı).
+export const ONCELIKLER = [
+  { deger: 0, ad: "Düşük", renk: "#9aa3ad" },
+  { deger: 1, ad: "Normal", renk: "#2f6fed" },
+  { deger: 2, ad: "Yüksek", renk: "#ef4444" },
+] as const;
 
 // Tezgaha ait atkı ipliği havuzu.
 export interface Iplik {

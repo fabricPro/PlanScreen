@@ -46,9 +46,15 @@ export const IFADELER = [
     "created_at" timestamp with time zone DEFAULT now() NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS "ndp_gorev" (
     "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-    "tezgah_id" uuid NOT NULL, "parent_id" uuid, "baslik" text NOT NULL,
-    "tamamlandi" boolean DEFAULT false NOT NULL, "sira" integer DEFAULT 0 NOT NULL,
+    "tezgah_id" uuid, "numune_id" uuid, "parent_id" uuid, "baslik" text NOT NULL,
+    "tamamlandi" boolean DEFAULT false NOT NULL,
+    "son_tarih" timestamp with time zone,
+    "oncelik" integer DEFAULT 1 NOT NULL, "sira" integer DEFAULT 0 NOT NULL,
     "created_at" timestamp with time zone DEFAULT now() NOT NULL)`,
+  `ALTER TABLE "ndp_gorev" ALTER COLUMN "tezgah_id" DROP NOT NULL`,
+  `ALTER TABLE "ndp_gorev" ADD COLUMN IF NOT EXISTS "numune_id" uuid`,
+  `ALTER TABLE "ndp_gorev" ADD COLUMN IF NOT EXISTS "son_tarih" timestamp with time zone`,
+  `ALTER TABLE "ndp_gorev" ADD COLUMN IF NOT EXISTS "oncelik" integer DEFAULT 1 NOT NULL`,
   `DO $$ BEGIN
     ALTER TABLE "ndp_cozgu" ADD CONSTRAINT "ndp_cozgu_tezgah_id_ndp_tezgah_id_fk"
       FOREIGN KEY ("tezgah_id") REFERENCES "public"."ndp_tezgah"("id") ON DELETE cascade;
@@ -72,5 +78,9 @@ export const IFADELER = [
   `DO $$ BEGIN
     ALTER TABLE "ndp_gorev" ADD CONSTRAINT "ndp_gorev_parent_id_ndp_gorev_id_fk"
       FOREIGN KEY ("parent_id") REFERENCES "public"."ndp_gorev"("id") ON DELETE cascade;
+   EXCEPTION WHEN duplicate_object THEN NULL; END $$`,
+  `DO $$ BEGIN
+    ALTER TABLE "ndp_gorev" ADD CONSTRAINT "ndp_gorev_numune_id_ndp_numune_id_fk"
+      FOREIGN KEY ("numune_id") REFERENCES "public"."ndp_numune"("id") ON DELETE set null;
    EXCEPTION WHEN duplicate_object THEN NULL; END $$`,
 ];

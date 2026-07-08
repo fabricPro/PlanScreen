@@ -1425,6 +1425,165 @@ select.tasi {
   border-color: color-mix(in srgb, var(--amber) 40%, transparent);
 }
 
+/* ---------- Görevler (to-do listesi) ---------- */
+.gorev-ekle-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: 12px;
+  margin-bottom: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+.gorev-ekle-bar .gorev-ekle-baslik {
+  flex: 1 1 220px;
+  min-width: 160px;
+}
+.gorev-ekle-bar input[type="date"],
+.gorev-ekle-bar select {
+  width: auto;
+  flex: 0 0 auto;
+}
+.gorev-ust-arac {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+nav.tabs.mini {
+  margin: 0;
+  padding: 3px;
+}
+nav.tabs.mini button {
+  padding: 6px 13px;
+  font-size: 0.84rem;
+}
+.gorev-filtre {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-soft);
+  cursor: pointer;
+}
+.gorev-filtre input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary);
+}
+
+.gorev-grup2 {
+  margin-bottom: 16px;
+}
+.gorev-grup-baslik {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 2px 8px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 6px;
+}
+.gorev-grup-baslik .grup-ad {
+  font-weight: 750;
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
+}
+.gorev-grup-baslik .grup-ad.gecikmis {
+  color: var(--warn);
+}
+.gorev-grup-baslik .grup-ad.bugun {
+  color: var(--amber);
+}
+.gorev-grup-govde {
+  padding-left: 2px;
+}
+
+/* Öncelik noktası */
+.oncelik-nokta {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  box-shadow: 0 0 0 2px color-mix(in srgb, currentColor 8%, transparent);
+}
+
+/* Son tarih çipi */
+.gorev-tarih {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+  background: var(--surface-3);
+  color: var(--text-soft);
+  border: 1px solid var(--border);
+}
+.gorev-tarih.gecikmis {
+  background: var(--warn-soft);
+  color: var(--warn);
+  border-color: color-mix(in srgb, var(--warn) 35%, transparent);
+}
+.gorev-tarih.yakin {
+  background: color-mix(in srgb, var(--amber) 14%, transparent);
+  color: var(--amber);
+  border-color: color-mix(in srgb, var(--amber) 35%, transparent);
+}
+
+/* Bağ çipleri (tezgah / numune) */
+.gorev-bag {
+  font-size: 0.72rem;
+  white-space: nowrap;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gorev-bag.tiklanir {
+  cursor: pointer;
+}
+.gorev-bag.tiklanir:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.gorev-araclar {
+  display: inline-flex;
+  gap: 3px;
+  flex: 0 0 auto;
+}
+
+/* Satır-içi düzenleme */
+.gorev-duzenle {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  margin: 4px 0 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.gorev-duzenle-alt {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.gorev-duzenle-alt label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 0.75rem;
+  margin: 0;
+}
+.gorev-duzenle-alt select,
+.gorev-duzenle-alt input {
+  width: auto;
+  min-width: 120px;
+}
+
 /* ---------- Geniş ekran (tablet yatay + masaüstü) ---------- */
 @media (min-width: 1200px) {
   .pano {
