@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   cozguApi,
+  iplikApi,
   numuneApi,
   orguSnapshotApi,
   tezgahApi,
@@ -8,6 +9,7 @@ import {
 import type { Cozgu, Numune, OrguSnapshot, Tezgah } from "../lib/types";
 import { hesaplaMetraj } from "../lib/metraj";
 import { numuneKisitlari, uyariSayisi } from "../lib/kisitlar";
+import { renkAdiBul } from "../lib/palette";
 import {
   durumRengi,
   isKesin,
@@ -16,6 +18,10 @@ import {
   sonrakiDurum,
 } from "../lib/durum";
 import { MetrajBar } from "./MetrajBar";
+import { BaglamMenu } from "./BaglamMenu";
+import type { MenuOge } from "./BaglamMenu";
+import { HizliForm } from "./HizliForm";
+import type { HizliAlan } from "./HizliForm";
 
 interface Props {
   onCozguAc: (cozguId: string) => void;
@@ -25,6 +31,15 @@ type Suru =
   | { tip: "cozgu"; id: string }
   | { tip: "numune"; id: string }
   | null;
+
+type MenuDurum = { x: number; y: number; ogeler: MenuOge[] } | null;
+type HizliDurum = {
+  x: number;
+  y: number;
+  baslik: string;
+  alanlar: HizliAlan[];
+  onKaydet: (d: Record<string, string>) => void;
+} | null;
 
 // Tezgah-şerit panosu (CLAUDE.md §7.1, §9 Faz 2): her tezgah bir kolon;
 // içinde çözgüler sırayla; her çözgünün altında numuneler.
@@ -37,6 +52,8 @@ export function Pano({ onCozguAc }: Props) {
   const [hata, setHata] = useState<string | null>(null);
   const [suru, setSuru] = useState<Suru>(null);
   const [hedef, setHedef] = useState<string | null>(null); // vurgulanan drop hedefi
+  const [menu, setMenu] = useState<MenuDurum>(null);
+  const [hizli, setHizli] = useState<HizliDurum>(null);
 
   async function yukle() {
     try {
@@ -72,6 +89,127 @@ export function Pano({ onCozguAc }: Props) {
       ? (snapshotHaritasi.get(n.orguSnapshotId) ?? null)
       : null;
     return uyariSayisi(numuneKisitlari(t, c, n, snap));
+  }
+
+  function aktifSayisi(tezgahId: string): number {
+    return cozguler.filter(
+      (c) => c.tezgahId === tezgahId && c.durum === "aktif",
+    ).length;
+  }
+
+  // Çözgü aktif/pasif — eşzamanlılık göstergesini besler (uyarır, engellemez).
+  function aktifToggle(c: Cozgu) {
+    const yeni = c.durum === "aktif" ? "taslak" : "aktif";
+    calis(() => cozguApi.update(c.id, { durum: yeni }));
+  }
+
+  // Hızlı ekleme akışları (sağ-tık menüsünden).
+  function hizliCozgu(tezgahId: string, x: number, y: number) {
+    setHizli({
+      x,
+      y,
+      baslik: "Hızlı çözgü",
+      alanlar: [
+        { ad: "adKod", etiket: "Ad / kod", placeholder: "ÇZG-…" },
+        { ad: "cozguBoyuM", etiket: "Çözgü boyu (m)", tip: "number" },
+      ],
+      onKaydet: (d) => {
+        const sonSira = cozgulerinTezgahi(tezgahId).length;
+        calis(() =>
+          cozguApi.create({
+            tezgahId,
+            adKod: d.adKod || "Yeni çözgü",
+            cozguBoyuM: d.cozguBoyuM || null,
+            tezgahSira: sonSira,
+          }),
+        );
+        setHizli(null);
+      },
+    });
+  }
+
+  function hizliIplik(tezgahId: string, x: number, y: number) {
+    setHizli({
+      x,
+      y,
+      baslik: "Havuza iplik ekle",
+      alanlar: [
+        { ad: "ad", etiket: "Ad", placeholder: "iplik adı" },
+        { ad: "numara", etiket: "Numara", placeholder: "30/2" },
+        { ad: "renk", etiket: "Renk (perde paleti)", renk: true },
+      ],
+      onKaydet: (d) => {
+        calis(() =>
+          iplikApi.create({
+            tezgahId,
+            ad: d.ad || "İplik",
+            numara: d.numara || null,
+            renk: d.renk || null,
+            renkAdi: d.renk ? renkAdiBul(d.renk) : null,
+          }),
+        );
+        setHizli(null);
+      },
+    });
+  }
+
+  function hizliNumune(cozguId: string, x: number, y: number) {
+    setHizli({
+      x,
+      y,
+      baslik: "Hızlı numune",
+      alanlar: [
+        { ad: "adKod", etiket: "Ad / kod", placeholder: "NUM-…" },
+        { ad: "tahminiBoyM", etiket: "Tahmini boy (m)", tip: "number" },
+      ],
+      onKaydet: (d) => {
+        const sonSira = cozgununNumuneleri(cozguId).length;
+        calis(() =>
+          numuneApi.create({
+            cozguId,
+            adKod: d.adKod || "Yeni numune",
+            tahminiBoyM: d.tahminiBoyM || null,
+            siraNo: sonSira,
+          }),
+        );
+        setHizli(null);
+      },
+    });
+  }
+
+  function tezgahMenu(t: Tezgah, e: React.MouseEvent) {
+    e.preventDefault();
+    setMenu({
+      x: e.clientX,
+      y: e.clientY,
+      ogeler: [
+        { etiket: "+ Çözgü ekle", onSec: () => hizliCozgu(t.id, e.clientX, e.clientY) },
+        {
+          etiket: "+ Havuza iplik ekle",
+          onSec: () => hizliIplik(t.id, e.clientX, e.clientY),
+        },
+      ],
+    });
+  }
+
+  function cozguMenu(c: Cozgu, e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    setMenu({
+      x: e.clientX,
+      y: e.clientY,
+      ogeler: [
+        {
+          etiket: "+ Hızlı numune",
+          onSec: () => hizliNumune(c.id, e.clientX, e.clientY),
+        },
+        {
+          etiket: c.durum === "aktif" ? "Pasifleştir" : "Aktif yap (tezgahta)",
+          onSec: () => aktifToggle(c),
+        },
+        { etiket: "Çözgüyü aç", onSec: () => onCozguAc(c.id), ayrac: true },
+      ],
+    });
   }
 
   function cozgulerinTezgahi(tezgahId: string): Cozgu[] {
@@ -173,10 +311,13 @@ export function Pano({ onCozguAc }: Props) {
     <div className="pano">
       {tezgahlar.map((t) => {
         const kolonCozguleri = cozgulerinTezgahi(t.id);
+        const aktif = aktifSayisi(t.id);
+        const asim = aktif > t.esZamanliCozgu;
         return (
           <div
             key={t.id}
             className={`serit${hedef === `tz-${t.id}` ? " drop" : ""}`}
+            onContextMenu={(e) => tezgahMenu(t, e)}
             onDragOver={(e) => {
               if (suru?.tip === "cozgu") {
                 e.preventDefault();
@@ -193,11 +334,17 @@ export function Pano({ onCozguAc }: Props) {
           >
             <h3>
               <span>{t.ad}</span>
-              <span className="mut" style={{ fontSize: 13 }}>
-                {kolonCozguleri.length} çözgü · {t.cerceveSayisi}çrç ·{" "}
-                {t.mekikSayisi}mkk
+              <span
+                className={`kapasite${asim ? " asim" : aktif === t.esZamanliCozgu ? " dolu" : ""}`}
+                title="Aynı anda çalışan çözgü / kapasite"
+              >
+                Aktif {aktif}/{t.esZamanliCozgu}
               </span>
             </h3>
+            <div className="mut" style={{ fontSize: 12, margin: "0 3px 8px" }}>
+              {kolonCozguleri.length} çözgü · {t.cerceveSayisi}çrç ·{" "}
+              {t.mekikSayisi}mkk · sağ-tık: hızlı ekle
+            </div>
 
             {kolonCozguleri.length === 0 && (
               <p className="mut" style={{ fontSize: 13 }}>
@@ -219,7 +366,8 @@ export function Pano({ onCozguAc }: Props) {
                   key={c.id}
                   className={`cozgu-kart${
                     hedef === `cz-${c.id}` ? " drop" : ""
-                  }`}
+                  }${c.durum === "aktif" ? " aktif" : ""}`}
+                  onContextMenu={(e) => cozguMenu(c, e)}
                   draggable
                   onDragStart={(e) => {
                     e.stopPropagation();
@@ -249,6 +397,11 @@ export function Pano({ onCozguAc }: Props) {
                   <div className="kart-baslik">
                     <span className="kod" onClick={() => onCozguAc(c.id)}>
                       {c.adKod}
+                      {c.durum === "aktif" && (
+                        <span className="aktif-rozet" style={{ marginLeft: 6 }}>
+                          AKTİF
+                        </span>
+                      )}
                     </span>
                     <span className="mini-araclar">
                       <button
@@ -354,6 +507,25 @@ export function Pano({ onCozguAc }: Props) {
           </div>
         );
       })}
+
+      {menu && (
+        <BaglamMenu
+          x={menu.x}
+          y={menu.y}
+          ogeler={menu.ogeler}
+          onKapat={() => setMenu(null)}
+        />
+      )}
+      {hizli && (
+        <HizliForm
+          x={hizli.x}
+          y={hizli.y}
+          baslik={hizli.baslik}
+          alanlar={hizli.alanlar}
+          onKaydet={hizli.onKaydet}
+          onKapat={() => setHizli(null)}
+        />
+      )}
     </div>
   );
 }

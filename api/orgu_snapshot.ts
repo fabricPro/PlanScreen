@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
-import { db } from "../src/db/client";
-import { ndpOrguSnapshot } from "../src/db/schema";
-import { govde, hata, idParam, json } from "../src/server/http";
+import { db } from "../src/db/client.js";
+import { ndpOrguSnapshot } from "../src/db/schema.js";
+import { govde, hata, idParam, json } from "../src/server/http.js";
 
 export const config = { runtime: "edge" };
 

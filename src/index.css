@@ -537,16 +537,6 @@ input[type="color"] {
   font-size: 1rem;
   margin: 3px 3px 13px;
 }
-.serit > h3 > span:last-child {
-  font-size: 0.72rem;
-  font-weight: 650;
-  color: var(--text-soft);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  padding: 3px 10px;
-  border-radius: 999px;
-  white-space: nowrap;
-}
 .serit.drop {
   outline: 2px dashed var(--primary);
   outline-offset: -3px;
@@ -667,6 +657,215 @@ select.tasi {
   margin-top: 9px;
   border-radius: 8px;
   color: var(--muted);
+}
+
+/* ---------- Renk seçici (perde paleti) ---------- */
+.renk-secici {
+  position: relative;
+  display: inline-block;
+}
+.renk-tetik {
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid var(--border-strong);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
+.renk-tetik:hover {
+  border-color: var(--primary);
+}
+.renk-pop {
+  position: absolute;
+  z-index: 60;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 268px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+}
+.renk-aile {
+  margin-bottom: 10px;
+}
+.renk-aile-ad {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+.renk-swatch-satir {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.renk-swatch-hucre {
+  position: relative;
+}
+.renk-swatch {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  cursor: pointer;
+  transition: transform 0.1s ease;
+  touch-action: none;
+}
+.renk-swatch:hover {
+  transform: scale(1.12);
+}
+.renk-swatch.secili {
+  outline: 2.5px solid var(--primary);
+  outline-offset: 1.5px;
+}
+.ton-menu {
+  position: absolute;
+  z-index: 70;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  padding: 5px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow-lg);
+}
+.ton-menu button {
+  width: 30px;
+  height: 34px;
+  padding: 0;
+  border-radius: 7px;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  cursor: pointer;
+}
+.ton-menu button.orta {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+.renk-ipucu {
+  font-size: 0.72rem;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+  margin-top: 2px;
+}
+
+/* ---------- Sağ-tık bağlam menüsü ---------- */
+.baglam-menu {
+  position: fixed;
+  z-index: 80;
+  min-width: 190px;
+  padding: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+}
+.baglam-menu button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: 8px 11px;
+  border-radius: 8px;
+  font-weight: 550;
+  font-size: 0.9rem;
+}
+.baglam-menu button:hover {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+.baglam-menu .ayrac {
+  height: 1px;
+  background: var(--border);
+  margin: 5px 4px;
+}
+
+/* ---------- Hızlı form popover ---------- */
+.hizli-form {
+  position: fixed;
+  z-index: 85;
+  width: 240px;
+  padding: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+}
+.hizli-form h4 {
+  margin: 0 0 8px;
+  font-size: 0.9rem;
+}
+
+/* ---------- İplik havuzu ---------- */
+.iplik-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 11px 5px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  font-size: 0.84rem;
+  font-weight: 550;
+  cursor: pointer;
+}
+.iplik-chip.secili {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+.iplik-nokta {
+  width: 15px;
+  height: 15px;
+  border-radius: 5px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  flex: 0 0 auto;
+}
+
+/* ---------- Eşzamanlılık / aktif ---------- */
+.kapasite {
+  font-size: 0.72rem;
+  font-weight: 650;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-soft);
+  white-space: nowrap;
+}
+.kapasite.dolu {
+  color: var(--amber);
+  border-color: color-mix(in srgb, var(--amber) 40%, transparent);
+}
+.kapasite.asim {
+  color: #fff;
+  background: var(--warn);
+  border-color: var(--warn);
+}
+.cozgu-kart.aktif::before {
+  background: linear-gradient(180deg, var(--ok), var(--ok-2));
+  width: 5px;
+}
+.aktif-rozet {
+  font-size: 0.62rem;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  color: #fff;
+  background: linear-gradient(135deg, var(--ok), var(--ok-2));
+  padding: 2px 7px;
+  border-radius: 999px;
 }
 
 /* ---------- Mobil / tablet ---------- */

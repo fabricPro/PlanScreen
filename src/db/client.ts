@@ -1,6 +1,6 @@
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import * as schema from "./schema";
+import * as schema from "./schema.js";
 
 // Serverless (Netlify Functions) içinde Neon HTTP driver + Drizzle.
 // DATABASE_URL yalnız sunucu tarafında (functions) okunur, tarayıcıya sızmaz.

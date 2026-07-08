@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { cozguApi, tezgahApi } from "../api/client";
 import type { Cozgu, Tezgah } from "../lib/types";
+import { ESZAMANLI_TAVAN } from "../lib/kisitlar";
+import { IplikHavuzu } from "./IplikHavuzu";
 
 interface Props {
   tezgahId: string;
@@ -65,6 +67,16 @@ export function TezgahDetay({ tezgahId, onGeri, onCozguAc }: Props) {
     form.cerceveKullanim != null &&
     Number(form.cerceveKullanim) > tezgah.cerceveSayisi;
 
+  async function kapasiteDegistir(deger: number) {
+    if (!tezgah) return;
+    try {
+      const g = await tezgahApi.update(tezgah.id, { esZamanliCozgu: deger });
+      setTezgah(g);
+    } catch (e) {
+      setHata((e as Error).message);
+    }
+  }
+
   return (
     <div>
       <div className="crumbs">
@@ -83,8 +95,32 @@ export function TezgahDetay({ tezgahId, onGeri, onCozguAc }: Props) {
             {tezgah.cerceveSayisi} çerçeve · {tezgah.mekikSayisi} mekik ·{" "}
             <span className="badge">{tezgah.durum}</span>
           </div>
+          <div
+            className="actions"
+            style={{ marginTop: 12, alignItems: "center", gap: 8 }}
+          >
+            <label style={{ margin: 0 }}>Aynı anda çalışan çözgü kapasitesi</label>
+            <select
+              value={tezgah.esZamanliCozgu}
+              style={{ width: "auto" }}
+              onChange={(e) => kapasiteDegistir(Number(e.target.value))}
+            >
+              {Array.from({ length: ESZAMANLI_TAVAN }, (_, i) => i + 1).map(
+                (n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ),
+              )}
+            </select>
+            <span className="mut" style={{ fontSize: "0.8rem" }}>
+              (varsayılan 2, tavan {ESZAMANLI_TAVAN})
+            </span>
+          </div>
         </div>
       )}
+
+      {tezgah && <IplikHavuzu tezgahId={tezgahId} />}
 
       <div className="panel">
         <h3>Çözgüler ({cozguler.length})</h3>

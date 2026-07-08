@@ -32,8 +32,29 @@ export interface Tezgah {
   cerceveSayisi: number;
   maxTarakEniCm: string | null;
   mekikSayisi: number;
+  esZamanliCozgu: number; // aynı anda çalışabilecek çözgü sayısı (kapasite)
   devir: number | null;
   durum: string;
+  notlar: string | null;
+  createdAt: string;
+}
+
+// Numunenin seçtiği atkı ipliği (havuzdan) — atkiIplikleri jsonb içinde.
+export interface AtkiIplikRef {
+  iplikId: string;
+  ad: string;
+  renk: string; // hex
+}
+
+// Tezgaha ait atkı ipliği havuzu.
+export interface Iplik {
+  id: string;
+  tezgahId: string;
+  ad: string;
+  tip: string | null;
+  renk: string | null; // hex
+  renkAdi: string | null;
+  numara: string | null;
   notlar: string | null;
   createdAt: string;
 }
@@ -60,7 +81,7 @@ export interface Numune {
   id: string;
   cozguId: string;
   adKod: string;
-  atkiIplikleri: unknown | null;
+  atkiIplikleri: AtkiIplikRef[] | null; // havuzdan seçilen atkı iplikleri
   atkiSikligi: string | null;
   orguSnapshotId: string | null;
   atkiRenkDizisi: string[] | null; // kullanılan atkı renkleri (hex) — mekik kontrolü

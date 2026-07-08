@@ -1,4 +1,5 @@
 import type { RenkBlok } from "../lib/types";
+import { RenkSecici } from "./RenkSecici";
 
 // Renk dizimi BU uygulamada tanımlanır (CLAUDE.md §5, §7.2).
 // Sıralı (iplik, renk, tel_adedi) blok listesi. Zengin çizgi simülatörü değil.
@@ -39,10 +40,9 @@ export function RenkDizimiEditor({ bloklar, onChange }: Props) {
             value={b.iplik}
             onChange={(e) => guncelle(i, { iplik: e.target.value })}
           />
-          <input
-            type="color"
+          <RenkSecici
             value={b.renk}
-            onChange={(e) => guncelle(i, { renk: e.target.value })}
+            onChange={(hex) => guncelle(i, { renk: hex })}
           />
           <input
             type="number"
