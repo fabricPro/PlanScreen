@@ -30,7 +30,7 @@ export default function App() {
     <>
       <header className="app">
         <h1>NDP</h1>
-        <small>Numune Dokuma Planlama · Faz 3</small>
+        <small>Numune Dokuma Planlama</small>
       </header>
 
       <nav className="tabs">

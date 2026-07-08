@@ -1,4 +1,4 @@
-import type { Cozgu, Numune, OrguSnapshot, Tezgah } from "../lib/types";
+import type { Cozgu, Iplik, Numune, OrguSnapshot, Tezgah } from "../lib/types";
 import type { WeaveXSnapshotGirdi } from "../lib/weavex";
 
 const BASE = "/api";
@@ -52,6 +52,16 @@ export const numuneApi = {
   update: (id: string, b: Partial<Numune>) =>
     req<Numune>(`numune?id=${id}`, "PUT", b),
   remove: (id: string) => req<{ silindi: string }>(`numune?id=${id}`, "DELETE"),
+};
+
+// İplik havuzu (tezgaha ait)
+export const iplikApi = {
+  listByTezgah: (tezgahId: string) =>
+    req<Iplik[]>(`iplik?tezgahId=${tezgahId}`, "GET"),
+  create: (b: Partial<Iplik>) => req<Iplik>("iplik", "POST", b),
+  update: (id: string, b: Partial<Iplik>) =>
+    req<Iplik>(`iplik?id=${id}`, "PUT", b),
+  remove: (id: string) => req<{ silindi: string }>(`iplik?id=${id}`, "DELETE"),
 };
 
 // Örgü snapshot (immutable import — PUT yok)

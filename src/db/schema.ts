@@ -22,6 +22,8 @@ export const ndpTezgah = pgTable("ndp_tezgah", {
   cerceveSayisi: integer("cerceve_sayisi").notNull().default(0), // sert limit
   maxTarakEniCm: numeric("max_tarak_eni_cm"),
   mekikSayisi: integer("mekik_sayisi").notNull().default(1), // atkı kutusu limiti
+  // Aynı anda çalışabilecek çözgü sayısı (eşzamanlılık kapasitesi). UI 1–3 sınırlar.
+  esZamanliCozgu: integer("eszamanli_cozgu").notNull().default(2),
   devir: integer("devir"),
   durum: text("durum").notNull().default("bos"), // bos | dolu | bakim
   notlar: text("notlar"),
@@ -61,7 +63,25 @@ export const ndpCozgu = pgTable("ndp_cozgu", {
   cerceveKullanim: integer("cerceve_kullanim"), // ≤ tezgah.cerceve_sayisi
   renkDizimi: jsonb("renk_dizimi"), // [{ iplik, renk, tel_adedi }, ...]
   tezgahSira: integer("tezgah_sira").notNull().default(0), // Faz 2 panosu için
+  // taslak | sirada | aktif | tamam | arsiv — 'aktif' eşzamanlılık kapasitesini sayar.
   durum: text("durum").notNull().default("taslak"),
+  notlar: text("notlar"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+// Tezgaha ait atkı ipliği havuzu — "bu tezgahta denenebilecek iplikler".
+export const ndpIplik = pgTable("ndp_iplik", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  tezgahId: uuid("tezgah_id")
+    .notNull()
+    .references(() => ndpTezgah.id, { onDelete: "cascade" }),
+  ad: text("ad").notNull(),
+  tip: text("tip"), // pamuk | polyester | ...
+  renk: text("renk"), // hex (perde paletinden)
+  renkAdi: text("renk_adi"), // palet adı, ör. "Bej — Orta"
+  numara: text("numara"), // iplik numarası, ör. 30/2
   notlar: text("notlar"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
@@ -102,3 +122,5 @@ export type YeniCozgu = typeof ndpCozgu.$inferInsert;
 export type Numune = typeof ndpNumune.$inferSelect;
 export type YeniNumune = typeof ndpNumune.$inferInsert;
 export type OrguSnapshot = typeof ndpOrguSnapshot.$inferSelect;
+export type Iplik = typeof ndpIplik.$inferSelect;
+export type YeniIplik = typeof ndpIplik.$inferInsert;

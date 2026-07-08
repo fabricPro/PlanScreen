@@ -109,3 +109,24 @@ export function numuneKisitlari(
 export function uyariSayisi(sonuclar: KisitSonuc[]): number {
   return sonuclar.filter((s) => s.durum === "uyari").length;
 }
+
+// Eşzamanlılık: aynı anda 'aktif' çözgü sayısı ≤ tezgah kapasitesi (2, tavan 3).
+export const ESZAMANLI_TAVAN = 3;
+
+export function eszamanliCozguKisiti(
+  tezgah: Tezgah,
+  aktifSayisi: number,
+): KisitSonuc {
+  if (aktifSayisi > tezgah.esZamanliCozgu) {
+    return {
+      anahtar: "cerceve", // (genel uyarı kanalı)
+      durum: "uyari",
+      mesaj: `${aktifSayisi} çözgü aktif, tezgah kapasitesi ${tezgah.esZamanliCozgu}.`,
+    };
+  }
+  return {
+    anahtar: "cerceve",
+    durum: "ok",
+    mesaj: `${aktifSayisi}/${tezgah.esZamanliCozgu} çözgü aktif.`,
+  };
+}

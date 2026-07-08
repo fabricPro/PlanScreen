@@ -1,12 +1,25 @@
 import { useEffect, useMemo, useState } from "react";
-import { cozguApi, numuneApi, orguSnapshotApi, tezgahApi } from "../api/client";
-import type { Cozgu, Numune, OrguSnapshot, RenkBlok, Tezgah } from "../lib/types";
+import {
+  cozguApi,
+  iplikApi,
+  numuneApi,
+  orguSnapshotApi,
+  tezgahApi,
+} from "../api/client";
+import type {
+  AtkiIplikRef,
+  Cozgu,
+  Iplik,
+  Numune,
+  OrguSnapshot,
+  RenkBlok,
+  Tezgah,
+} from "../lib/types";
 import { NUMUNE_DURUMLARI } from "../lib/types";
 import { hesaplaMetraj } from "../lib/metraj";
 import { numuneKisitlari } from "../lib/kisitlar";
 import { MetrajBar } from "./MetrajBar";
 import { RenkDizimiEditor } from "./RenkDizimiEditor";
-import { AtkiRenkEditor } from "./AtkiRenkEditor";
 import { KisitUyari } from "./KisitUyari";
 
 interface Props {
@@ -20,17 +33,24 @@ const bosNumune: Partial<Numune> = {
   atkiSikligi: "",
   durum: "taslak",
   orguSnapshotId: null,
+  atkiIplikleri: [],
   atkiRenkDizisi: [],
   argeTalepKodu: "",
   argeTalepUrl: "",
   fasIlhamUrl: "",
 };
 
+// Seçilen ipliklerin renklerinden atkı renk dizisini türet (mekik kontrolü girdisi).
+function renklerdenDizi(iplikler: AtkiIplikRef[]): string[] {
+  return iplikler.map((i) => i.renk).filter(Boolean);
+}
+
 export function CozguDetay({ cozguId, onGeri }: Props) {
   const [cozgu, setCozgu] = useState<Cozgu | null>(null);
   const [tezgah, setTezgah] = useState<Tezgah | null>(null);
   const [numuneler, setNumuneler] = useState<Numune[]>([]);
   const [snapshotlar, setSnapshotlar] = useState<OrguSnapshot[]>([]);
+  const [iplikler, setIplikler] = useState<Iplik[]>([]);
   const [renkDizimi, setRenkDizimi] = useState<RenkBlok[]>([]);
   const [renkKaydedildi, setRenkKaydedildi] = useState(false);
   const [numForm, setNumForm] = useState<Partial<Numune>>(bosNumune);
@@ -40,16 +60,18 @@ export function CozguDetay({ cozguId, onGeri }: Props) {
   async function yukle() {
     try {
       const c = await cozguApi.get(cozguId);
-      const [t, ns, ss] = await Promise.all([
+      const [t, ns, ss, ip] = await Promise.all([
         tezgahApi.get(c.tezgahId),
         numuneApi.listByCozgu(cozguId),
         orguSnapshotApi.listAll(),
+        iplikApi.listByTezgah(c.tezgahId),
       ]);
       setCozgu(c);
       setTezgah(t);
       setRenkDizimi(Array.isArray(c.renkDizimi) ? c.renkDizimi : []);
       setNumuneler(ns);
       setSnapshotlar(ss);
+      setIplikler(ip);
       setHata(null);
     } catch (e) {
       setHata((e as Error).message);
@@ -71,13 +93,27 @@ export function CozguDetay({ cozguId, onGeri }: Props) {
     return m;
   }, [snapshotlar]);
 
+  const seciliIplikler = numForm.atkiIplikleri ?? [];
+
+  function iplikToggle(ip: Iplik) {
+    const varMi = seciliIplikler.some((s) => s.iplikId === ip.id);
+    const yeni: AtkiIplikRef[] = varMi
+      ? seciliIplikler.filter((s) => s.iplikId !== ip.id)
+      : [...seciliIplikler, { iplikId: ip.id, ad: ip.ad, renk: ip.renk ?? "#999999" }];
+    setNumForm({
+      ...numForm,
+      atkiIplikleri: yeni,
+      atkiRenkDizisi: renklerdenDizi(yeni),
+    });
+  }
+
   // Formdaki numune için anlık kısıt önizlemesi.
   const formKisitlari = useMemo(() => {
     if (!tezgah || !cozgu) return [];
     const onizleme = {
       ...bosNumune,
       ...numForm,
-      atkiRenkDizisi: numForm.atkiRenkDizisi ?? [],
+      atkiRenkDizisi: renklerdenDizi(numForm.atkiIplikleri ?? []),
     } as Numune;
     const snap = numForm.orguSnapshotId
       ? (snapshotHaritasi.get(numForm.orguSnapshotId) ?? null)
@@ -284,12 +320,42 @@ export function CozguDetay({ cozguId, onGeri }: Props) {
           </div>
 
           <div style={{ marginTop: 8 }}>
-            <label>Atkı renkleri (mekik kontrolü)</label>
-            <AtkiRenkEditor
-              renkler={numForm.atkiRenkDizisi ?? []}
-              onChange={(r) => setNumForm({ ...numForm, atkiRenkDizisi: r })}
-              mekikSayisi={tezgah?.mekikSayisi}
-            />
+            <label>
+              Atkı iplikleri (havuzdan seç — mekik kontrolü)
+              {tezgah && (
+                <span className="mut">
+                  {" "}· {new Set(seciliIplikler.map((s) => s.renk.toLowerCase())).size}/
+                  {tezgah.mekikSayisi} renk
+                </span>
+              )}
+            </label>
+            {iplikler.length === 0 ? (
+              <p className="mut" style={{ fontSize: "0.84rem" }}>
+                Bu tezgahın iplik havuzu boş. Tezgah detayından iplik ekleyin.
+              </p>
+            ) : (
+              <div className="row" style={{ gap: 8 }}>
+                {iplikler.map((ip) => {
+                  const secili = seciliIplikler.some(
+                    (s) => s.iplikId === ip.id,
+                  );
+                  return (
+                    <span
+                      key={ip.id}
+                      className={`iplik-chip${secili ? " secili" : ""}`}
+                      onClick={() => iplikToggle(ip)}
+                    >
+                      <span
+                        className="iplik-nokta"
+                        style={{ background: ip.renk ?? "#ccc" }}
+                      />
+                      {ip.ad}
+                      {secili ? " ✓" : ""}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           <div className="grid2" style={{ marginTop: 8 }}>
