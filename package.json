@@ -1,0 +1,32 @@
+{
+  "name": "ndp",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "NDP — Numune Dokuma Planlama (planlama/çizelge aracı)",
+  "scripts": {
+    "dev": "vercel dev",
+    "dev:vite": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:migrate:http": "node scripts/apply-migration.mjs",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.4",
+    "drizzle-orm": "^0.38.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "drizzle-kit": "^0.30.1",
+    "typescript": "^5.7.2",
+    "vite": "^5.4.11"
+  }
+}
