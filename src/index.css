@@ -834,6 +834,26 @@ select.tasi {
   flex: 0 0 auto;
 }
 
+/* ---------- Panoda iplik şeridi ---------- */
+.serit-iplik {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 6px 8px;
+  margin: 0 2px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+}
+.serit-iplik-et {
+  font-size: 0.6rem;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin-right: 2px;
+}
+
 /* ---------- Eşzamanlılık / aktif ---------- */
 .kapasite {
   font-size: 0.72rem;

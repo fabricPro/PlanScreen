@@ -6,7 +6,7 @@ import {
   orguSnapshotApi,
   tezgahApi,
 } from "../api/client";
-import type { Cozgu, Numune, OrguSnapshot, Tezgah } from "../lib/types";
+import type { Cozgu, Iplik, Numune, OrguSnapshot, Tezgah } from "../lib/types";
 import { hesaplaMetraj } from "../lib/metraj";
 import { numuneKisitlari, uyariSayisi } from "../lib/kisitlar";
 import { renkAdiBul } from "../lib/palette";
@@ -49,6 +49,7 @@ export function Pano({ onCozguAc }: Props) {
   const [cozguler, setCozguler] = useState<Cozgu[]>([]);
   const [numuneler, setNumuneler] = useState<Numune[]>([]);
   const [snapshotlar, setSnapshotlar] = useState<OrguSnapshot[]>([]);
+  const [iplikler, setIplikler] = useState<Iplik[]>([]);
   const [hata, setHata] = useState<string | null>(null);
   const [suru, setSuru] = useState<Suru>(null);
   const [hedef, setHedef] = useState<string | null>(null); // vurgulanan drop hedefi
@@ -57,16 +58,18 @@ export function Pano({ onCozguAc }: Props) {
 
   async function yukle() {
     try {
-      const [t, c, n, s] = await Promise.all([
+      const [t, c, n, s, ip] = await Promise.all([
         tezgahApi.list(),
         cozguApi.listAll(),
         numuneApi.listAll(),
         orguSnapshotApi.listAll(),
+        iplikApi.listAll(),
       ]);
       setTezgahlar(t);
       setCozguler(c);
       setNumuneler(n);
       setSnapshotlar(s);
+      setIplikler(ip);
       setHata(null);
     } catch (e) {
       setHata((e as Error).message);
@@ -82,6 +85,16 @@ export function Pano({ onCozguAc }: Props) {
     snapshotlar.forEach((s) => m.set(s.id, s));
     return m;
   }, [snapshotlar]);
+
+  const iplikHaritasi = useMemo(() => {
+    const m = new Map<string, Iplik[]>();
+    iplikler.forEach((ip) => {
+      const arr = m.get(ip.tezgahId) ?? [];
+      arr.push(ip);
+      m.set(ip.tezgahId, arr);
+    });
+    return m;
+  }, [iplikler]);
 
   // Bir numunenin kısıt uyarı sayısı (⚠ göstergesi için).
   function numuneUyari(t: Tezgah, c: Cozgu, n: Numune): number {
@@ -311,6 +324,7 @@ export function Pano({ onCozguAc }: Props) {
     <div className="pano">
       {tezgahlar.map((t) => {
         const kolonCozguleri = cozgulerinTezgahi(t.id);
+        const kolonIplikleri = iplikHaritasi.get(t.id) ?? [];
         const aktif = aktifSayisi(t.id);
         const asim = aktif > t.esZamanliCozgu;
         return (
@@ -341,10 +355,27 @@ export function Pano({ onCozguAc }: Props) {
                 Aktif {aktif}/{t.esZamanliCozgu}
               </span>
             </h3>
-            <div className="mut" style={{ fontSize: 12, margin: "0 3px 8px" }}>
+            <div className="mut" style={{ fontSize: 12, margin: "0 3px 6px" }}>
               {kolonCozguleri.length} çözgü · {t.cerceveSayisi}çrç ·{" "}
               {t.mekikSayisi}mkk · sağ-tık: hızlı ekle
             </div>
+
+            {kolonIplikleri.length > 0 && (
+              <div className="serit-iplik" title="İplik havuzu">
+                <span className="serit-iplik-et">İPLİK</span>
+                {kolonIplikleri.map((ip) => (
+                  <span
+                    key={ip.id}
+                    className="iplik-nokta"
+                    style={{ background: ip.renk ?? "#ccc" }}
+                    title={`${ip.ad}${ip.numara ? " · " + ip.numara : ""}`}
+                  />
+                ))}
+                <span className="mut" style={{ fontSize: 11 }}>
+                  {kolonIplikleri.length}
+                </span>
+              </div>
+            )}
 
             {kolonCozguleri.length === 0 && (
               <p className="mut" style={{ fontSize: 13 }}>
