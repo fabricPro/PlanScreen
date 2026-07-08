@@ -22,6 +22,13 @@
       "when": 1783514035305,
       "tag": "0002_silky_pride",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1783520421786,
+      "tag": "0003_fat_proudstar",
+      "breakpoints": true
     }
   ]
 }

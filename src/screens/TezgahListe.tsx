@@ -46,6 +46,9 @@ export function TezgahListe({ onAc }: Props) {
         ...form,
         cerceveSayisi: Number(form.cerceveSayisi) || 0,
         mekikSayisi: Number(form.mekikSayisi) || 1,
+        planTarihi: form.planTarihi
+          ? new Date(form.planTarihi).toISOString()
+          : null,
       });
       setForm(bosForm);
       setEkleAcik(false);
@@ -54,6 +57,24 @@ export function TezgahListe({ onAc }: Props) {
       setHata((e as Error).message);
     }
   }
+
+  async function arsivDegistir(t: Tezgah, arsivlendi: boolean) {
+    try {
+      await tezgahApi.update(t.id, { arsivlendi });
+      await yukle();
+    } catch (e) {
+      setHata((e as Error).message);
+    }
+  }
+
+  function tarihKisa(iso: string | null): string | null {
+    if (!iso) return null;
+    const d = new Date(iso);
+    return isNaN(d.getTime()) ? null : d.toLocaleDateString("tr-TR");
+  }
+
+  const aktifler = liste.filter((t) => !t.arsivlendi);
+  const arsivliler = liste.filter((t) => t.arsivlendi);
 
   return (
     <div>
@@ -66,11 +87,11 @@ export function TezgahListe({ onAc }: Props) {
       <div className="panel">
         {yukleniyor ? (
           <p className="mut">Yükleniyor…</p>
-        ) : liste.length === 0 ? (
-          <p className="mut">Henüz tezgah yok. Aşağıdan ekleyin.</p>
+        ) : aktifler.length === 0 ? (
+          <p className="mut">Aktif tezgah yok. Aşağıdan ekleyin.</p>
         ) : (
           <div className="row">
-            {liste.map((t) => (
+            {aktifler.map((t) => (
               <div key={t.id} className="card" onClick={() => onAc(t.id)}>
                 <div className="kod">{t.ad}</div>
                 <div className="meta">
@@ -79,12 +100,42 @@ export function TezgahListe({ onAc }: Props) {
                 </div>
                 <div className="meta">
                   <span className="badge">{t.durum}</span>
+                  {t.planTarihi && (
+                    <span className="badge">📅 {tarihKisa(t.planTarihi)}</span>
+                  )}
                 </div>
               </div>
             ))}
           </div>
         )}
       </div>
+
+      {arsivliler.length > 0 && (
+        <div className="panel">
+          <h3>Arşivlenenler ({arsivliler.length})</h3>
+          <div className="row">
+            {arsivliler.map((t) => (
+              <div key={t.id} className="card" style={{ opacity: 0.75 }}>
+                <div className="kod" onClick={() => onAc(t.id)}>
+                  {t.ad}
+                </div>
+                <div className="meta">
+                  {t.planTarihi ? `📅 ${tarihKisa(t.planTarihi)} · ` : ""}
+                  <span className="badge">arşiv</span>
+                </div>
+                <div className="actions">
+                  <button
+                    className="small"
+                    onClick={() => arsivDegistir(t, false)}
+                  >
+                    Arşivden çıkar
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {ekleAcik ? (
         <div className="panel">
@@ -146,6 +197,16 @@ export function TezgahListe({ onAc }: Props) {
                   </option>
                 ))}
               </select>
+            </div>
+            <div>
+              <label>Plan tarihi</label>
+              <input
+                type="date"
+                value={form.planTarihi ? form.planTarihi.slice(0, 10) : ""}
+                onChange={(e) =>
+                  setForm({ ...form, planTarihi: e.target.value || null })
+                }
+              />
             </div>
           </div>
           <div className="actions">

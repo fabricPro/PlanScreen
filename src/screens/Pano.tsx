@@ -38,7 +38,19 @@ interface Props {
 type Suru =
   | { tip: "cozgu"; id: string }
   | { tip: "numune"; id: string }
+  | { tip: "tezgah"; id: string }
   | null;
+
+function tarihKisa(iso: string | null): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return null;
+  return d.toLocaleDateString("tr-TR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
 
 type MenuDurum = { x: number; y: number; ogeler: MenuOge[] } | null;
 type HizliDurum = {
@@ -64,6 +76,22 @@ export function Pano({ onCozguAc }: Props) {
   const [hedef, setHedef] = useState<string | null>(null); // vurgulanan drop hedefi
   const [menu, setMenu] = useState<MenuDurum>(null);
   const [hizli, setHizli] = useState<HizliDurum>(null);
+  const [acikCozguler, setAcikCozguler] = useState<Set<string>>(new Set());
+
+  function cozguToggleAc(id: string) {
+    setAcikCozguler((prev) => {
+      const k = new Set(prev);
+      if (k.has(id)) k.delete(id);
+      else k.add(id);
+      return k;
+    });
+  }
+  function hepsiniAc(idler: string[]) {
+    setAcikCozguler(new Set(idler));
+  }
+  function hepsiniKapa() {
+    setAcikCozguler(new Set());
+  }
 
   async function yukle() {
     try {
@@ -107,6 +135,15 @@ export function Pano({ onCozguAc }: Props) {
     return m;
   }, [iplikler]);
 
+  // Panoda görünen tezgahlar: arşivlenmemiş, sıra'ya göre.
+  const gorunenTezgahlar = useMemo(
+    () =>
+      tezgahlar
+        .filter((t) => !t.arsivlendi)
+        .sort((a, b) => a.sira - b.sira || a.createdAt.localeCompare(b.createdAt)),
+    [tezgahlar],
+  );
+
   // Bir numunenin kısıt uyarı sayısı (⚠ göstergesi için).
   function numuneUyari(t: Tezgah, c: Cozgu, n: Numune): number {
     const snap = n.orguSnapshotId
@@ -125,6 +162,90 @@ export function Pano({ onCozguAc }: Props) {
   function aktifToggle(c: Cozgu) {
     const yeni = c.durum === "aktif" ? "taslak" : "aktif";
     calis(() => cozguApi.update(c.id, { durum: yeni }));
+  }
+
+  // Tezgah sırasını sürükle-bırakla değiştir (görünen liste üzerinde yeniden indeksle).
+  function tezgahSirala(suruId: string, hedefId: string) {
+    if (suruId === hedefId) return;
+    const sirali = gorunenTezgahlar.slice();
+    const from = sirali.findIndex((t) => t.id === suruId);
+    const to = sirali.findIndex((t) => t.id === hedefId);
+    if (from < 0 || to < 0) return;
+    const [tasinan] = sirali.splice(from, 1);
+    sirali.splice(to, 0, tasinan);
+    calis(() =>
+      Promise.all(
+        sirali.map((t, i) =>
+          t.sira === i ? null : tezgahApi.update(t.id, { sira: i }),
+        ),
+      ),
+    );
+  }
+
+  // Panoda hızlı tezgah oluştur.
+  function hizliTezgah(x: number, y: number) {
+    setHizli({
+      x,
+      y,
+      baslik: "Hızlı tezgah",
+      alanlar: [
+        { ad: "ad", etiket: "Tezgah adı", placeholder: "Tezgah…" },
+        { ad: "planTarihi", etiket: "Plan tarihi", tip: "date" },
+      ],
+      onKaydet: (d) => {
+        if (!d.ad?.trim()) {
+          setHizli(null);
+          return;
+        }
+        const sonSira = gorunenTezgahlar.length;
+        calis(() =>
+          tezgahApi.create({
+            ad: d.ad.trim(),
+            planTarihi: d.planTarihi
+              ? new Date(d.planTarihi).toISOString()
+              : null,
+            sira: sonSira,
+          }),
+        );
+        setHizli(null);
+      },
+    });
+  }
+
+  function tezgahArsivle(t: Tezgah) {
+    if (
+      !window.confirm(
+        `"${t.ad}" planı tamamlandı olarak arşive alınsın mı?\nPanodan gizlenir; Liste sekmesinden geri alabilirsin.`,
+      )
+    )
+      return;
+    calis(() => tezgahApi.update(t.id, { arsivlendi: true }));
+  }
+
+  function planTarihiBelirle(t: Tezgah, x: number, y: number) {
+    setHizli({
+      x,
+      y,
+      baslik: "Plan tarihi",
+      alanlar: [
+        {
+          ad: "planTarihi",
+          etiket: "Plan tarihi",
+          tip: "date",
+          varsayilan: t.planTarihi ? t.planTarihi.slice(0, 10) : "",
+        },
+      ],
+      onKaydet: (d) => {
+        calis(() =>
+          tezgahApi.update(t.id, {
+            planTarihi: d.planTarihi
+              ? new Date(d.planTarihi).toISOString()
+              : null,
+          }),
+        );
+        setHizli(null);
+      },
+    });
   }
 
   // Hızlı ekleme akışları (sağ-tık menüsünden).
@@ -253,6 +374,15 @@ export function Pano({ onCozguAc }: Props) {
         {
           etiket: "+ Havuza iplik ekle",
           onSec: () => hizliIplik(t.id, e.clientX, e.clientY),
+        },
+        {
+          etiket: "Plan tarihi belirle",
+          ayrac: true,
+          onSec: () => planTarihiBelirle(t, e.clientX, e.clientY),
+        },
+        {
+          etiket: "✓ Plan tamamlandı → Arşive al",
+          onSec: () => tezgahArsivle(t),
         },
         {
           etiket: "Tezgahı yeniden adlandır",
@@ -398,17 +528,32 @@ export function Pano({ onCozguAc }: Props) {
 
   if (hata) return <p className="hata">⚠ {hata}</p>;
 
-  if (tezgahlar.length === 0) {
-    return (
-      <p className="mut">
-        Henüz tezgah yok. "Liste" sekmesinden tezgah ve çözgü ekleyin.
-      </p>
-    );
-  }
-
   return (
-    <div className="pano">
-      {tezgahlar.map((t) => {
+    <>
+      <div className="pano-arac">
+        <button
+          className="small"
+          onClick={(e) => hizliTezgah(e.clientX, e.clientY)}
+        >
+          + Tezgah
+        </button>
+        <span style={{ flex: 1 }} />
+        <button
+          className="small"
+          onClick={() => hepsiniAc(cozguler.map((c) => c.id))}
+        >
+          Tümünü aç
+        </button>
+        <button className="small" onClick={hepsiniKapa}>
+          Tümünü kapat
+        </button>
+      </div>
+
+      <div className="pano">
+        {gorunenTezgahlar.length === 0 && (
+          <p className="mut">Panoda tezgah yok. "+ Tezgah" ile ekleyin.</p>
+        )}
+        {gorunenTezgahlar.map((t) => {
         const kolonCozguleri = cozgulerinTezgahi(t.id);
         const kolonIplikleri = iplikHaritasi.get(t.id) ?? [];
         const tGorev = gorevler.filter((g) => g.tezgahId === t.id);
@@ -421,7 +566,7 @@ export function Pano({ onCozguAc }: Props) {
             className={`serit${hedef === `tz-${t.id}` ? " drop" : ""}`}
             onContextMenu={(e) => tezgahMenu(t, e)}
             onDragOver={(e) => {
-              if (suru?.tip === "cozgu") {
+              if (suru?.tip === "cozgu" || suru?.tip === "tezgah") {
                 e.preventDefault();
                 setHedef(`tz-${t.id}`);
               }
@@ -430,12 +575,28 @@ export function Pano({ onCozguAc }: Props) {
             onDrop={(e) => {
               e.preventDefault();
               if (suru?.tip === "cozgu") cozguyuTezgahaTasi(suru.id, t.id);
+              else if (suru?.tip === "tezgah") tezgahSirala(suru.id, t.id);
               setSuru(null);
               setHedef(null);
             }}
           >
             <h3>
-              <span>{t.ad}</span>
+              <span
+                className="tezgah-tut"
+                title="Sürükleyerek sırala"
+                draggable
+                onDragStart={(e) => {
+                  e.stopPropagation();
+                  setSuru({ tip: "tezgah", id: t.id });
+                }}
+                onDragEnd={() => {
+                  setSuru(null);
+                  setHedef(null);
+                }}
+              >
+                ⠿
+              </span>
+              <span style={{ flex: 1 }}>{t.ad}</span>
               <span
                 className={`kapasite${asim ? " asim" : aktif === t.esZamanliCozgu ? " dolu" : ""}`}
                 title="Aynı anda çalışan çözgü / kapasite"
@@ -443,6 +604,11 @@ export function Pano({ onCozguAc }: Props) {
                 Aktif {aktif}/{t.esZamanliCozgu}
               </span>
             </h3>
+            {t.planTarihi && (
+              <div className="plan-tarih" title="Plan tarihi">
+                📅 {tarihKisa(t.planTarihi)}
+              </div>
+            )}
             <div
               className="mut"
               style={{
@@ -497,6 +663,11 @@ export function Pano({ onCozguAc }: Props) {
               const iptaller = cNumuneler.filter(
                 (n) => !isTaslak(n.durum) && !isKesin(n.durum),
               );
+              const acik = acikCozguler.has(c.id);
+              const kartUyari = cNumuneler.reduce(
+                (s, n) => s + numuneUyari(t, c, n),
+                0,
+              );
 
               return (
                 <div
@@ -532,6 +703,13 @@ export function Pano({ onCozguAc }: Props) {
                   }}
                 >
                   <div className="kart-baslik">
+                    <button
+                      className="katla"
+                      title={acik ? "Kapat" : "Aç"}
+                      onClick={() => cozguToggleAc(c.id)}
+                    >
+                      {acik ? "▾" : "▸"}
+                    </button>
                     <span className="kod" onClick={() => onCozguAc(c.id)}>
                       {c.adKod}
                       {c.durum === "aktif" && (
@@ -562,7 +740,15 @@ export function Pano({ onCozguAc }: Props) {
                     <MetrajBar ozet={metraj} />
                   </div>
 
-                  {tezgahlar.length > 1 && (
+                  {/* Katlanmış özet */}
+                  <div className="kart-ozet" onClick={() => cozguToggleAc(c.id)}>
+                    {cNumuneler.length} numune
+                    {kartUyari > 0 && (
+                      <span className="hata"> · ⚠ {kartUyari}</span>
+                    )}
+                  </div>
+
+                  {acik && tezgahlar.length > 1 && (
                     <select
                       className="tasi"
                       value=""
@@ -582,6 +768,8 @@ export function Pano({ onCozguAc }: Props) {
                     </select>
                   )}
 
+                  {acik && (
+                  <>
                   {taslaklar.length > 0 && (
                     <>
                       <div className="havuz-etiket">Taslak havuz</div>
@@ -641,6 +829,8 @@ export function Pano({ onCozguAc }: Props) {
                       }}
                     />
                   ))}
+                  </>
+                  )}
                 </div>
               );
             })}
@@ -666,7 +856,8 @@ export function Pano({ onCozguAc }: Props) {
           onKapat={() => setHizli(null)}
         />
       )}
-    </div>
+      </div>
+    </>
   );
 }
 

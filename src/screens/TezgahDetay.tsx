@@ -81,6 +81,15 @@ export function TezgahDetay({ tezgahId, onGeri, onCozguAc }: Props) {
     }
   }
 
+  async function tezgahGuncelle(alanlar: Partial<Tezgah>) {
+    if (!tezgah) return;
+    try {
+      setTezgah(await tezgahApi.update(tezgah.id, alanlar));
+    } catch (e) {
+      setHata((e as Error).message);
+    }
+  }
+
   return (
     <div>
       <div className="crumbs">
@@ -120,6 +129,37 @@ export function TezgahDetay({ tezgahId, onGeri, onCozguAc }: Props) {
             <span className="mut" style={{ fontSize: "0.8rem" }}>
               (varsayılan 2, tavan {ESZAMANLI_TAVAN})
             </span>
+          </div>
+          <div
+            className="actions"
+            style={{ marginTop: 10, alignItems: "center", gap: 8 }}
+          >
+            <label style={{ margin: 0 }}>Plan tarihi</label>
+            <input
+              type="date"
+              style={{ width: "auto" }}
+              value={tezgah.planTarihi ? tezgah.planTarihi.slice(0, 10) : ""}
+              onChange={(e) =>
+                tezgahGuncelle({
+                  planTarihi: e.target.value
+                    ? new Date(e.target.value).toISOString()
+                    : null,
+                })
+              }
+            />
+            {tezgah.arsivlendi ? (
+              <button onClick={() => tezgahGuncelle({ arsivlendi: false })}>
+                Arşivden çıkar
+              </button>
+            ) : (
+              <button
+                onClick={() => tezgahGuncelle({ arsivlendi: true })}
+                title="Plan tamamlandı → arşive al"
+              >
+                ✓ Planı arşive al
+              </button>
+            )}
+            {tezgah.arsivlendi && <span className="badge">arşiv</span>}
           </div>
         </div>
       )}

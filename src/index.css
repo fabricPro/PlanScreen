@@ -842,6 +842,56 @@ select.tasi {
   flex: 0 0 auto;
 }
 
+/* ---------- Pano araç çubuğu / tezgah sürükle / katlama ---------- */
+.pano-arac {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.tezgah-tut {
+  cursor: grab;
+  color: var(--muted);
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0 4px;
+  user-select: none;
+}
+.tezgah-tut:active {
+  cursor: grabbing;
+}
+.plan-tarih {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-soft);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 2px 9px;
+  border-radius: 999px;
+  margin: 0 2px 8px;
+}
+.katla {
+  padding: 1px 6px;
+  font-size: 0.8rem;
+  line-height: 1;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+}
+.katla:hover {
+  color: var(--primary);
+  background: transparent;
+}
+.kart-ozet {
+  font-size: 0.76rem;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 2px 2px 0;
+}
+
 /* ---------- Panoda iplik şeridi ---------- */
 .serit-iplik {
   display: flex;

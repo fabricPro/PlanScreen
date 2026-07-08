@@ -20,6 +20,9 @@ const IFADELER: string[] = [
     "devir" integer, "durum" text DEFAULT 'bos' NOT NULL, "notlar" text,
     "created_at" timestamp with time zone DEFAULT now() NOT NULL)`,
   `ALTER TABLE "ndp_tezgah" ADD COLUMN IF NOT EXISTS "eszamanli_cozgu" integer DEFAULT 2 NOT NULL`,
+  `ALTER TABLE "ndp_tezgah" ADD COLUMN IF NOT EXISTS "plan_tarihi" timestamp with time zone`,
+  `ALTER TABLE "ndp_tezgah" ADD COLUMN IF NOT EXISTS "arsivlendi" boolean DEFAULT false NOT NULL`,
+  `ALTER TABLE "ndp_tezgah" ADD COLUMN IF NOT EXISTS "sira" integer DEFAULT 0 NOT NULL`,
   `CREATE TABLE IF NOT EXISTS "ndp_orgu_snapshot" (
     "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
     "kaynak" text, "kaynak_id" text, "kaynak_versiyon" text,

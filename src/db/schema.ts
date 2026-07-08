@@ -25,6 +25,9 @@ export const ndpTezgah = pgTable("ndp_tezgah", {
   mekikSayisi: integer("mekik_sayisi").notNull().default(1), // atkı kutusu limiti
   // Aynı anda çalışabilecek çözgü sayısı (eşzamanlılık kapasitesi). UI 1–3 sınırlar.
   esZamanliCozgu: integer("eszamanli_cozgu").notNull().default(2),
+  planTarihi: timestamp("plan_tarihi", { withTimezone: true }), // planlanan tarih
+  arsivlendi: boolean("arsivlendi").notNull().default(false), // plan tamamlandı → arşiv
+  sira: integer("sira").notNull().default(0), // pano sıralaması
   devir: integer("devir"),
   durum: text("durum").notNull().default("bos"), // bos | dolu | bakim
   notlar: text("notlar"),

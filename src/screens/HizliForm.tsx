@@ -6,7 +6,7 @@ export interface HizliAlan {
   ad: string;
   etiket: string;
   placeholder?: string;
-  tip?: "text" | "number";
+  tip?: "text" | "number" | "date";
   renk?: boolean; // RenkSecici alanı
   varsayilan?: string;
 }

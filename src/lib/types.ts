@@ -33,6 +33,9 @@ export interface Tezgah {
   maxTarakEniCm: string | null;
   mekikSayisi: number;
   esZamanliCozgu: number; // aynı anda çalışabilecek çözgü sayısı (kapasite)
+  planTarihi: string | null; // planlanan tarih (ISO)
+  arsivlendi: boolean; // plan tamamlandı → arşiv
+  sira: number; // pano sıralaması
   devir: number | null;
   durum: string;
   notlar: string | null;
