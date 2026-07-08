@@ -1,4 +1,4 @@
-import type { Gorev, Numune, Tezgah } from "../lib/types";
+import type { Cozgu, Gorev, Numune, Tezgah } from "../lib/types";
 import { GorevSatir } from "./GorevSatir";
 
 // Özyinelemeli görev ağacı. Verilen parentId'nin çocuklarını çizer; her düğüm
@@ -7,8 +7,8 @@ interface Props {
   gorevler: Gorev[];
   parentId: string | null;
   tezgahlar: Tezgah[];
+  cozguler: Cozgu[];
   numuneler: Numune[];
-  numuneTezgahId: (numuneId: string) => string | null;
   onDegisti: () => void;
   onAc?: (cozguId: string) => void;
   derinlik?: number;
@@ -18,8 +18,8 @@ export function GorevAgaci({
   gorevler,
   parentId,
   tezgahlar,
+  cozguler,
   numuneler,
-  numuneTezgahId,
   onDegisti,
   onAc,
   derinlik = 0,
@@ -41,8 +41,8 @@ export function GorevAgaci({
               gorev={g}
               ilerleme={{ biten: bitenAlt, toplam: dogrudan.length }}
               tezgahlar={tezgahlar}
+              cozguler={cozguler}
               numuneler={numuneler}
-              numuneTezgahId={numuneTezgahId}
               onDegisti={onDegisti}
               onAc={onAc}
             />
@@ -51,8 +51,8 @@ export function GorevAgaci({
               gorevler={gorevler}
               parentId={g.id}
               tezgahlar={tezgahlar}
+              cozguler={cozguler}
               numuneler={numuneler}
-              numuneTezgahId={numuneTezgahId}
               onDegisti={onDegisti}
               onAc={onAc}
               derinlik={derinlik + 1}

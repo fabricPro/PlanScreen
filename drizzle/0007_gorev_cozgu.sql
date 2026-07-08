@@ -1,0 +1,2 @@
+ALTER TABLE "ndp_gorev" ADD COLUMN "cozgu_id" uuid;--> statement-breakpoint
+ALTER TABLE "ndp_gorev" ADD CONSTRAINT "ndp_gorev_cozgu_id_ndp_cozgu_id_fk" FOREIGN KEY ("cozgu_id") REFERENCES "public"."ndp_cozgu"("id") ON DELETE set null ON UPDATE no action;

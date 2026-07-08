@@ -27,8 +27,16 @@ export function Gorevler({ onAc }: Props) {
     sonTarih: string;
     oncelik: number;
     tezgahId: string;
+    cozguId: string;
     numuneId: string;
-  }>({ baslik: "", sonTarih: "", oncelik: 1, tezgahId: "", numuneId: "" });
+  }>({
+    baslik: "",
+    sonTarih: "",
+    oncelik: 1,
+    tezgahId: "",
+    cozguId: "",
+    numuneId: "",
+  });
 
   async function yukle() {
     try {
@@ -52,25 +60,21 @@ export function Gorevler({ onAc }: Props) {
     yukle();
   }, []);
 
-  // numuneId → tezgahId (numune → çözgü → tezgah).
-  const cozguTezgah = useMemo(() => {
-    const m = new Map<string, string>();
-    cozguler.forEach((c) => m.set(c.id, c.tezgahId));
-    return m;
-  }, [cozguler]);
-  const numuneTezgah = useMemo(() => {
-    const m = new Map<string, string>();
-    numuneler.forEach((n) => {
-      const tz = cozguTezgah.get(n.cozguId);
-      if (tz) m.set(n.id, tz);
-    });
-    return m;
-  }, [numuneler, cozguTezgah]);
-  const numuneTezgahId = (numuneId: string) => numuneTezgah.get(numuneId) ?? null;
+  // Bir tezgahın çözgüleri (tezgah sırasına göre).
+  const tezgahinCozguleri = (tezgahId: string) =>
+    cozguler
+      .filter((c) => c.tezgahId === tezgahId)
+      .sort(
+        (a, b) =>
+          a.tezgahSira - b.tezgahSira || a.createdAt.localeCompare(b.createdAt),
+      );
 
-  // Ekleme çubuğunda seçili tezgahın numuneleri.
-  const yeniNumuneleri = yeni.tezgahId
-    ? numuneler.filter((n) => numuneTezgahId(n.id) === yeni.tezgahId)
+  // Ekleme çubuğunda seçili tezgahın çözgüleri, seçili çözgünün numuneleri.
+  const yeniCozguleri = yeni.tezgahId ? tezgahinCozguleri(yeni.tezgahId) : [];
+  const yeniNumuneleri = yeni.cozguId
+    ? numuneler
+        .filter((n) => n.cozguId === yeni.cozguId)
+        .sort((a, b) => a.siraNo - b.siraNo)
     : [];
 
   async function ekle() {
@@ -81,10 +85,18 @@ export function Gorevler({ onAc }: Props) {
         sonTarih: yeni.sonTarih ? new Date(yeni.sonTarih).toISOString() : null,
         oncelik: yeni.oncelik,
         tezgahId: yeni.tezgahId || null,
+        cozguId: yeni.cozguId || null,
         numuneId: yeni.numuneId || null,
         parentId: null,
       });
-      setYeni({ baslik: "", sonTarih: "", oncelik: 1, tezgahId: "", numuneId: "" });
+      setYeni({
+        baslik: "",
+        sonTarih: "",
+        oncelik: 1,
+        tezgahId: "",
+        cozguId: "",
+        numuneId: "",
+      });
       await yukle();
     } catch (e) {
       setHata((e as Error).message);
@@ -144,6 +156,37 @@ export function Gorevler({ onAc }: Props) {
 
   const toplamAcik = gorevler.filter((g) => !g.tamamlandi).length;
 
+  // Kök görev listesini (satır + alt ağaç) çizer — çözgü blokları / düz liste ortak.
+  function rootlariCiz(rootlar: Gorev[]) {
+    return rootlar.map((root) => {
+      const dogrudan = gorevler.filter((x) => x.parentId === root.id);
+      const bitenAlt = dogrudan.filter((x) => x.tamamlandi).length;
+      return (
+        <div key={root.id}>
+          <GorevSatir
+            gorev={root}
+            ilerleme={{ biten: bitenAlt, toplam: dogrudan.length }}
+            tezgahlar={tezgahlar}
+            cozguler={cozguler}
+            numuneler={numuneler}
+            onDegisti={yukle}
+            onAc={onAc}
+          />
+          <GorevAgaci
+            gorevler={gorevler}
+            parentId={root.id}
+            tezgahlar={tezgahlar}
+            cozguler={cozguler}
+            numuneler={numuneler}
+            onDegisti={yukle}
+            onAc={onAc}
+            derinlik={1}
+          />
+        </div>
+      );
+    });
+  }
+
   return (
     <div>
       <div className="crumbs">
@@ -183,7 +226,12 @@ export function Gorevler({ onAc }: Props) {
           title="Tezgah"
           value={yeni.tezgahId}
           onChange={(e) =>
-            setYeni({ ...yeni, tezgahId: e.target.value, numuneId: "" })
+            setYeni({
+              ...yeni,
+              tezgahId: e.target.value,
+              cozguId: "",
+              numuneId: "",
+            })
           }
         >
           <option value="">Tezgah — yok</option>
@@ -194,9 +242,24 @@ export function Gorevler({ onAc }: Props) {
           ))}
         </select>
         <select
+          title="Çözgü"
+          value={yeni.cozguId}
+          disabled={!yeni.tezgahId}
+          onChange={(e) =>
+            setYeni({ ...yeni, cozguId: e.target.value, numuneId: "" })
+          }
+        >
+          <option value="">Çözgü — yok</option>
+          {yeniCozguleri.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.adKod}
+            </option>
+          ))}
+        </select>
+        <select
           title="Numune"
           value={yeni.numuneId}
-          disabled={!yeni.tezgahId}
+          disabled={!yeni.cozguId}
           onChange={(e) => setYeni({ ...yeni, numuneId: e.target.value })}
         >
           <option value="">Numune — yok</option>
@@ -243,6 +306,12 @@ export function Gorevler({ onAc }: Props) {
 
       {gruplar.map((grp) => {
         const biten = grp.kokler.filter((g) => g.tamamlandi).length;
+        // Tezgah modunda gerçek tezgah grubu → çözgü alt-başlıkları.
+        const tezgahModu = gruplama === "tezgah" && grp.anahtar !== "bagimsiz";
+        const grupCozguleri = tezgahModu ? tezgahinCozguleri(grp.anahtar) : [];
+        const cozgusuz = grp.kokler
+          .filter((r) => !r.cozguId)
+          .sort(kokSirala);
         return (
           <div className="gorev-grup2" key={grp.anahtar}>
             <div className="gorev-grup-baslik">
@@ -252,33 +321,38 @@ export function Gorevler({ onAc }: Props) {
               </span>
             </div>
             <div className="gorev-grup-govde">
-              {grp.kokler.map((root) => {
-                const dogrudan = gorevler.filter((x) => x.parentId === root.id);
-                const bitenAlt = dogrudan.filter((x) => x.tamamlandi).length;
-                return (
-                  <div key={root.id}>
-                    <GorevSatir
-                      gorev={root}
-                      ilerleme={{ biten: bitenAlt, toplam: dogrudan.length }}
-                      tezgahlar={tezgahlar}
-                      numuneler={numuneler}
-                      numuneTezgahId={numuneTezgahId}
-                      onDegisti={yukle}
-                      onAc={onAc}
-                    />
-                    <GorevAgaci
-                      gorevler={gorevler}
-                      parentId={root.id}
-                      tezgahlar={tezgahlar}
-                      numuneler={numuneler}
-                      numuneTezgahId={numuneTezgahId}
-                      onDegisti={yukle}
-                      onAc={onAc}
-                      derinlik={1}
-                    />
-                  </div>
-                );
-              })}
+              {tezgahModu ? (
+                <>
+                  {grupCozguleri.map((cz) => {
+                    const czRootlar = grp.kokler
+                      .filter((r) => r.cozguId === cz.id)
+                      .sort(kokSirala);
+                    return (
+                      <div className="gorev-cozgu-blok" key={cz.id}>
+                        <div className="gorev-cozgu-baslik">
+                          ▤ {cz.adKod}
+                          <span className="mut"> · {czRootlar.length}</span>
+                        </div>
+                        {czRootlar.length > 0 ? (
+                          rootlariCiz(czRootlar)
+                        ) : (
+                          <p className="mut gorev-cozgu-bos">görev yok</p>
+                        )}
+                      </div>
+                    );
+                  })}
+                  {cozgusuz.length > 0 && (
+                    <div className="gorev-cozgu-blok">
+                      <div className="gorev-cozgu-baslik mut">
+                        Çözgüsüz (tezgah geneli) · {cozgusuz.length}
+                      </div>
+                      {rootlariCiz(cozgusuz)}
+                    </div>
+                  )}
+                </>
+              ) : (
+                rootlariCiz(grp.kokler)
+              )}
             </div>
           </div>
         );

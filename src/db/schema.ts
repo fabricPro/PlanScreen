@@ -101,6 +101,9 @@ export const ndpGorev = pgTable("ndp_gorev", {
   tezgahId: uuid("tezgah_id").references(() => ndpTezgah.id, {
     onDelete: "cascade",
   }), // opsiyonel bağ
+  cozguId: uuid("cozgu_id").references(() => ndpCozgu.id, {
+    onDelete: "set null",
+  }), // opsiyonel bağ (silinince kopar)
   numuneId: uuid("numune_id").references(() => ndpNumune.id, {
     onDelete: "set null",
   }), // opsiyonel bağ (silinince kopar)

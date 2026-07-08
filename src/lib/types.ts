@@ -55,6 +55,7 @@ export interface AtkiIplikRef {
 export interface Gorev {
   id: string;
   tezgahId: string | null; // opsiyonel bağ
+  cozguId: string | null; // opsiyonel bağ
   numuneId: string | null; // opsiyonel bağ
   parentId: string | null;
   baslik: string;

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { cozguApi, gorevApi, numuneApi, tezgahApi } from "../api/client";
 import type { Cozgu, Gorev, Numune, Tezgah } from "../lib/types";
 import { GorevAgaci } from "./GorevAgaci";
@@ -33,16 +33,6 @@ export function GorevListesi({ tezgahId }: { tezgahId: string }) {
   useEffect(() => {
     yukle();
   }, [tezgahId]);
-
-  const cozguTezgah = useMemo(() => {
-    const m = new Map<string, string>();
-    cozguler.forEach((c) => m.set(c.id, c.tezgahId));
-    return m;
-  }, [cozguler]);
-  const numuneTezgahId = (numuneId: string) => {
-    const n = numuneler.find((x) => x.id === numuneId);
-    return n ? cozguTezgah.get(n.cozguId) ?? null : null;
-  };
 
   async function kokEkle() {
     if (!kokMetin.trim()) return;
@@ -80,8 +70,8 @@ export function GorevListesi({ tezgahId }: { tezgahId: string }) {
           gorevler={gorevler}
           parentId={null}
           tezgahlar={tezgahlar}
+          cozguler={cozguler}
           numuneler={numuneler}
-          numuneTezgahId={numuneTezgahId}
           onDegisti={yukle}
         />
       )}

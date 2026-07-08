@@ -1565,6 +1565,30 @@ nav.tabs.mini button {
   padding-left: 2px;
 }
 
+/* Çözgü alt-blokları (tezgah grubunda) */
+.gorev-cozgu-blok {
+  margin: 6px 0 8px;
+  padding-left: 10px;
+  border-left: 2px solid var(--border);
+}
+.gorev-cozgu-baslik {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  font-weight: 650;
+  color: var(--text-soft);
+  padding: 2px 0 4px;
+}
+.gorev-cozgu-baslik.mut {
+  font-weight: 600;
+  color: var(--muted);
+}
+.gorev-cozgu-bos {
+  font-size: 0.76rem;
+  padding: 1px 0 2px 4px;
+}
+
 /* Öncelik noktası */
 .oncelik-nokta {
   width: 9px;

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { gorevApi } from "../api/client";
-import type { Gorev, Numune, Tezgah } from "../lib/types";
+import type { Cozgu, Gorev, Numune, Tezgah } from "../lib/types";
 import { ONCELIKLER } from "../lib/types";
 import { tarihDurum, tarihKisa } from "../lib/gorev";
 
@@ -8,10 +8,19 @@ interface Props {
   gorev: Gorev;
   ilerleme?: { biten: number; toplam: number };
   tezgahlar: Tezgah[];
+  cozguler: Cozgu[];
   numuneler: Numune[];
-  numuneTezgahId: (numuneId: string) => string | null;
   onDegisti: () => void;
   onAc?: (cozguId: string) => void;
+}
+
+// Bir tezgahın çözgüleri (tezgah sırasına göre).
+function tezgahCozguleri(cozguler: Cozgu[], tezgahId: string): Cozgu[] {
+  return cozguler
+    .filter((c) => c.tezgahId === tezgahId)
+    .sort(
+      (a, b) => a.tezgahSira - b.tezgahSira || a.createdAt.localeCompare(b.createdAt),
+    );
 }
 
 // Tek görev satırı (paylaşılan): checkbox · başlık · öncelik · son tarih · bağ çipleri
@@ -20,8 +29,8 @@ export function GorevSatir({
   gorev: g,
   ilerleme,
   tezgahlar,
+  cozguler,
   numuneler,
-  numuneTezgahId,
   onDegisti,
   onAc,
 }: Props) {
@@ -36,6 +45,7 @@ export function GorevSatir({
   const tezgahAd = g.tezgahId
     ? tezgahlar.find((t) => t.id === g.tezgahId)?.ad ?? null
     : null;
+  const cozgu = g.cozguId ? cozguler.find((c) => c.id === g.cozguId) : null;
   const numune = g.numuneId ? numuneler.find((n) => n.id === g.numuneId) : null;
 
   async function toggle() {
@@ -54,6 +64,7 @@ export function GorevSatir({
       sonTarih: g.sonTarih,
       oncelik: g.oncelik,
       tezgahId: g.tezgahId,
+      cozguId: g.cozguId,
       numuneId: g.numuneId,
     });
     setDuzenle(true);
@@ -64,6 +75,7 @@ export function GorevSatir({
       sonTarih: form.sonTarih ?? null,
       oncelik: form.oncelik ?? 1,
       tezgahId: form.tezgahId ?? null,
+      cozguId: form.cozguId ?? null,
       numuneId: form.numuneId ?? null,
     });
     setDuzenle(false);
@@ -75,6 +87,7 @@ export function GorevSatir({
       baslik: altMetin.trim(),
       parentId: g.id,
       tezgahId: g.tezgahId,
+      cozguId: g.cozguId,
       numuneId: g.numuneId,
     });
     setAltMetin("");
@@ -82,9 +95,14 @@ export function GorevSatir({
     onDegisti();
   }
 
-  // Düzenleme formunda seçili tezgahın numuneleri.
-  const formNumuneleri = form.tezgahId
-    ? numuneler.filter((n) => numuneTezgahId(n.id) === form.tezgahId)
+  // Düzenleme formu: seçili tezgahın çözgüleri, seçili çözgünün numuneleri.
+  const formCozguleri = form.tezgahId
+    ? tezgahCozguleri(cozguler, form.tezgahId)
+    : [];
+  const formNumuneleri = form.cozguId
+    ? numuneler
+        .filter((n) => n.cozguId === form.cozguId)
+        .sort((a, b) => a.siraNo - b.siraNo)
     : [];
 
   return (
@@ -111,6 +129,15 @@ export function GorevSatir({
         {tezgahAd && (
           <span className="badge gorev-bag" title="Bağlı tezgah">
             🧵 {tezgahAd}
+          </span>
+        )}
+        {cozgu && (
+          <span
+            className="badge gorev-bag tiklanir"
+            title="Bağlı çözgü — aç"
+            onClick={() => onAc?.(cozgu.id)}
+          >
+            ▤ {cozgu.adKod}
           </span>
         )}
         {numune && (
@@ -193,6 +220,7 @@ export function GorevSatir({
                   setForm({
                     ...form,
                     tezgahId: e.target.value || null,
+                    cozguId: null,
                     numuneId: null,
                   })
                 }
@@ -206,10 +234,31 @@ export function GorevSatir({
               </select>
             </label>
             <label>
+              Çözgü
+              <select
+                value={form.cozguId ?? ""}
+                disabled={!form.tezgahId}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    cozguId: e.target.value || null,
+                    numuneId: null,
+                  })
+                }
+              >
+                <option value="">— yok —</option>
+                {formCozguleri.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.adKod}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
               Numune
               <select
                 value={form.numuneId ?? ""}
-                disabled={!form.tezgahId}
+                disabled={!form.cozguId}
                 onChange={(e) =>
                   setForm({ ...form, numuneId: e.target.value || null })
                 }
