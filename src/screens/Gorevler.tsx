@@ -18,7 +18,7 @@ export function Gorevler({ onAc }: Props) {
   const [numuneler, setNumuneler] = useState<Numune[]>([]);
   const [gorevler, setGorevler] = useState<Gorev[]>([]);
   const [hata, setHata] = useState<string | null>(null);
-  const [gruplama, setGruplama] = useState<Gruplama>("tarih");
+  const [gruplama, setGruplama] = useState<Gruplama>("tezgah");
   const [bitenGizle, setBitenGizle] = useState(false);
 
   // Ekleme çubuğu formu
