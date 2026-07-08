@@ -8,6 +8,7 @@
     "dev": "vercel dev",
     "dev:vite": "vite",
     "build": "tsc -b && vite build",
+    "vercel-build": "tsc -b && vite build && node scripts/db-migrate.mjs",
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit",
     "db:generate": "drizzle-kit generate",
