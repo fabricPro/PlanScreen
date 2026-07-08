@@ -73,17 +73,18 @@ export default async (req: Request): Promise<Response> => {
     return hata("Geçersiz key.", 403);
   }
 
-  const calisan: string[] = [];
-  try {
-    for (const ifade of IFADELER) {
+  // Her ifadeyi ayrı çalıştır — biri patlasa da (ör. FK bloğu) diğerleri işlesin;
+  // kritik ALTER … ADD COLUMN mutlaka denenmiş olur. Her zaman 200 + rapor döner.
+  const rapor: { ifade: string; ok: boolean; hata?: string }[] = [];
+  for (const ifade of IFADELER) {
+    const ozet = ifade.slice(0, 52).replace(/\s+/g, " ").trim() + "…";
+    try {
       await db.execute(sql.raw(ifade));
-      calisan.push(ifade.slice(0, 48).replace(/\s+/g, " ").trim() + "…");
+      rapor.push({ ifade: ozet, ok: true });
+    } catch (e) {
+      rapor.push({ ifade: ozet, ok: false, hata: (e as Error).message });
     }
-    return json({ ok: true, calisan });
-  } catch (e) {
-    return json(
-      { ok: false, hata: (e as Error).message, tamamlanan: calisan },
-      500,
-    );
   }
+  const hepsiOk = rapor.every((r) => r.ok);
+  return json({ ok: hepsiOk, rapor });
 };
