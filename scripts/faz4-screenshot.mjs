@@ -66,7 +66,7 @@ await page.goto("http://localhost:4173/", { waitUntil: "networkidle" });
 // 1) Pano: eşzamanlılık (Aktif 3/2 uyarı) + AKTİF rozet + sağ-tık menü
 await page.waitForSelector(".serit");
 await page.waitForTimeout(250);
-await page.click(".cozgu-kart", { button: "right" });
+await page.click(".serit > h3", { button: "right" });
 await page.waitForSelector(".baglam-menu");
 await page.screenshot({ path: "scripts/faz4-pano.png", fullPage: false });
 await page.keyboard.press("Escape");

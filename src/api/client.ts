@@ -56,6 +56,7 @@ export const numuneApi = {
 
 // İplik havuzu (tezgaha ait)
 export const iplikApi = {
+  listAll: () => req<Iplik[]>("iplik", "GET"),
   listByTezgah: (tezgahId: string) =>
     req<Iplik[]>(`iplik?tezgahId=${tezgahId}`, "GET"),
   create: (b: Partial<Iplik>) => req<Iplik>("iplik", "POST", b),

@@ -6,7 +6,7 @@ import {
   orguSnapshotApi,
   tezgahApi,
 } from "../api/client";
-import type { Cozgu, Numune, OrguSnapshot, Tezgah } from "../lib/types";
+import type { Cozgu, Iplik, Numune, OrguSnapshot, Tezgah } from "../lib/types";
 import { hesaplaMetraj } from "../lib/metraj";
 import { numuneKisitlari, uyariSayisi } from "../lib/kisitlar";
 import { renkAdiBul } from "../lib/palette";
@@ -49,6 +49,7 @@ export function Pano({ onCozguAc }: Props) {
   const [cozguler, setCozguler] = useState<Cozgu[]>([]);
   const [numuneler, setNumuneler] = useState<Numune[]>([]);
   const [snapshotlar, setSnapshotlar] = useState<OrguSnapshot[]>([]);
+  const [iplikler, setIplikler] = useState<Iplik[]>([]);
   const [hata, setHata] = useState<string | null>(null);
   const [suru, setSuru] = useState<Suru>(null);
   const [hedef, setHedef] = useState<string | null>(null); // vurgulanan drop hedefi
@@ -57,16 +58,18 @@ export function Pano({ onCozguAc }: Props) {
 
   async function yukle() {
     try {
-      const [t, c, n, s] = await Promise.all([
+      const [t, c, n, s, ip] = await Promise.all([
         tezgahApi.list(),
         cozguApi.listAll(),
         numuneApi.listAll(),
         orguSnapshotApi.listAll(),
+        iplikApi.listAll(),
       ]);
       setTezgahlar(t);
       setCozguler(c);
       setNumuneler(n);
       setSnapshotlar(s);
+      setIplikler(ip);
       setHata(null);
     } catch (e) {
       setHata((e as Error).message);
@@ -82,6 +85,16 @@ export function Pano({ onCozguAc }: Props) {
     snapshotlar.forEach((s) => m.set(s.id, s));
     return m;
   }, [snapshotlar]);
+
+  const iplikHaritasi = useMemo(() => {
+    const m = new Map<string, Iplik[]>();
+    iplikler.forEach((ip) => {
+      const arr = m.get(ip.tezgahId) ?? [];
+      arr.push(ip);
+      m.set(ip.tezgahId, arr);
+    });
+    return m;
+  }, [iplikler]);
 
   // Bir numunenin kısıt uyarı sayısı (⚠ göstergesi için).
   function numuneUyari(t: Tezgah, c: Cozgu, n: Numune): number {
@@ -177,17 +190,65 @@ export function Pano({ onCozguAc }: Props) {
     });
   }
 
+  function tezgahYenidenAdlandir(t: Tezgah, x: number, y: number) {
+    setHizli({
+      x,
+      y,
+      baslik: "Tezgahı yeniden adlandır",
+      alanlar: [{ ad: "ad", etiket: "Tezgah adı", varsayilan: t.ad }],
+      onKaydet: (d) => {
+        if (d.ad?.trim()) calis(() => tezgahApi.update(t.id, { ad: d.ad.trim() }));
+        setHizli(null);
+      },
+    });
+  }
+
+  function tezgahSil(t: Tezgah) {
+    if (
+      !window.confirm(
+        `"${t.ad}" tezgahı silinsin mi?\nBu tezgahın TÜM çözgüleri, numuneleri ve iplik havuzu da silinir. Geri alınamaz.`,
+      )
+    )
+      return;
+    calis(() => tezgahApi.remove(t.id));
+  }
+
+  function cozguSil(c: Cozgu) {
+    if (
+      !window.confirm(
+        `"${c.adKod}" çözgüsü silinsin mi?\nBu çözgünün tüm numuneleri de silinir. Geri alınamaz.`,
+      )
+    )
+      return;
+    calis(() => cozguApi.remove(c.id));
+  }
+
+  function numuneSil(n: Numune) {
+    if (!window.confirm(`"${n.adKod}" numunesi silinsin mi? Geri alınamaz.`))
+      return;
+    calis(() => numuneApi.remove(n.id));
+  }
+
   function tezgahMenu(t: Tezgah, e: React.MouseEvent) {
     e.preventDefault();
     setMenu({
       x: e.clientX,
       y: e.clientY,
       ogeler: [
-        { etiket: "+ Çözgü ekle", onSec: () => hizliCozgu(t.id, e.clientX, e.clientY) },
+        {
+          etiket: "+ Hızlı çözgü",
+          onSec: () => hizliCozgu(t.id, e.clientX, e.clientY),
+        },
         {
           etiket: "+ Havuza iplik ekle",
           onSec: () => hizliIplik(t.id, e.clientX, e.clientY),
         },
+        {
+          etiket: "Tezgahı yeniden adlandır",
+          ayrac: true,
+          onSec: () => tezgahYenidenAdlandir(t, e.clientX, e.clientY),
+        },
+        { etiket: "Tezgahı sil", tehlike: true, onSec: () => tezgahSil(t) },
       ],
     });
   }
@@ -207,8 +268,24 @@ export function Pano({ onCozguAc }: Props) {
           etiket: c.durum === "aktif" ? "Pasifleştir" : "Aktif yap (tezgahta)",
           onSec: () => aktifToggle(c),
         },
-        { etiket: "Çözgüyü aç", onSec: () => onCozguAc(c.id), ayrac: true },
+        { etiket: "Çözgüyü aç", onSec: () => onCozguAc(c.id) },
+        {
+          etiket: "Çözgüyü sil",
+          tehlike: true,
+          ayrac: true,
+          onSec: () => cozguSil(c),
+        },
       ],
+    });
+  }
+
+  function numuneMenu(n: Numune, e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    setMenu({
+      x: e.clientX,
+      y: e.clientY,
+      ogeler: [{ etiket: "Numune sil", tehlike: true, onSec: () => numuneSil(n) }],
     });
   }
 
@@ -311,6 +388,7 @@ export function Pano({ onCozguAc }: Props) {
     <div className="pano">
       {tezgahlar.map((t) => {
         const kolonCozguleri = cozgulerinTezgahi(t.id);
+        const kolonIplikleri = iplikHaritasi.get(t.id) ?? [];
         const aktif = aktifSayisi(t.id);
         const asim = aktif > t.esZamanliCozgu;
         return (
@@ -341,10 +419,27 @@ export function Pano({ onCozguAc }: Props) {
                 Aktif {aktif}/{t.esZamanliCozgu}
               </span>
             </h3>
-            <div className="mut" style={{ fontSize: 12, margin: "0 3px 8px" }}>
+            <div className="mut" style={{ fontSize: 12, margin: "0 3px 6px" }}>
               {kolonCozguleri.length} çözgü · {t.cerceveSayisi}çrç ·{" "}
               {t.mekikSayisi}mkk · sağ-tık: hızlı ekle
             </div>
+
+            {kolonIplikleri.length > 0 && (
+              <div className="serit-iplik" title="İplik havuzu">
+                <span className="serit-iplik-et">İPLİK</span>
+                {kolonIplikleri.map((ip) => (
+                  <span
+                    key={ip.id}
+                    className="iplik-nokta"
+                    style={{ background: ip.renk ?? "#ccc" }}
+                    title={`${ip.ad}${ip.numara ? " · " + ip.numara : ""}`}
+                  />
+                ))}
+                <span className="mut" style={{ fontSize: 11 }}>
+                  {kolonIplikleri.length}
+                </span>
+              </div>
+            )}
 
             {kolonCozguleri.length === 0 && (
               <p className="mut" style={{ fontSize: 13 }}>
@@ -453,6 +548,7 @@ export function Pano({ onCozguAc }: Props) {
                           key={n.id}
                           n={n}
                           uyari={numuneUyari(t, c, n)}
+                          onMenu={(e) => numuneMenu(n, e)}
                           onSira={(d) => numuneSirala(c.id, n.id, d)}
                           onDurum={(hd) => durumDegistir(n, hd)}
                           onSuruBasla={() => setSuru({ tip: "numune", id: n.id })}
@@ -475,6 +571,7 @@ export function Pano({ onCozguAc }: Props) {
                           key={n.id}
                           n={n}
                           uyari={numuneUyari(t, c, n)}
+                          onMenu={(e) => numuneMenu(n, e)}
                           onSira={(d) => numuneSirala(c.id, n.id, d)}
                           onDurum={(hd) => durumDegistir(n, hd)}
                           onSuruBasla={() => setSuru({ tip: "numune", id: n.id })}
@@ -492,6 +589,7 @@ export function Pano({ onCozguAc }: Props) {
                       key={n.id}
                       n={n}
                       uyari={numuneUyari(t, c, n)}
+                      onMenu={(e) => numuneMenu(n, e)}
                       onSira={(d) => numuneSirala(c.id, n.id, d)}
                       onDurum={(hd) => durumDegistir(n, hd)}
                       onSuruBasla={() => setSuru({ tip: "numune", id: n.id })}
@@ -534,6 +632,7 @@ export function Pano({ onCozguAc }: Props) {
 function NumuneSatir({
   n,
   uyari = 0,
+  onMenu,
   onSira,
   onDurum,
   onSuruBasla,
@@ -541,6 +640,7 @@ function NumuneSatir({
 }: {
   n: Numune;
   uyari?: number;
+  onMenu: (e: React.MouseEvent) => void;
   onSira: (dir: -1 | 1) => void;
   onDurum: (hedefDurum: string | null) => void;
   onSuruBasla: () => void;
@@ -554,6 +654,7 @@ function NumuneSatir({
     <div
       className="numune-satir"
       draggable
+      onContextMenu={onMenu}
       onDragStart={(e) => {
         e.stopPropagation();
         onSuruBasla();
