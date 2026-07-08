@@ -1,8 +1,8 @@
 import { eq } from "drizzle-orm";
-import { db } from "../src/db/client";
-import { ndpTezgah } from "../src/db/schema";
-import { govde, hata, idParam, json } from "../src/server/http";
-import type { YeniTezgah } from "../src/db/schema";
+import { db } from "../src/db/client.js";
+import { ndpTezgah } from "../src/db/schema.js";
+import { govde, hata, idParam, json } from "../src/server/http.js";
+import type { YeniTezgah } from "../src/db/schema.js";
 
 // Vercel Edge Function — Web standardı Request→Response.
 export const config = { runtime: "edge" };

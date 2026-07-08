@@ -1,8 +1,8 @@
 import { eq } from "drizzle-orm";
-import { db } from "../src/db/client";
-import { ndpCozgu } from "../src/db/schema";
-import { govde, hata, idParam, json } from "../src/server/http";
-import type { YeniCozgu } from "../src/db/schema";
+import { db } from "../src/db/client.js";
+import { ndpCozgu } from "../src/db/schema.js";
+import { govde, hata, idParam, json } from "../src/server/http.js";
+import type { YeniCozgu } from "../src/db/schema.js";
 
 export const config = { runtime: "edge" };
 
