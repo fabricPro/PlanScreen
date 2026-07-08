@@ -3,6 +3,7 @@ import { cozguApi, tezgahApi } from "../api/client";
 import type { Cozgu, Tezgah } from "../lib/types";
 import { ESZAMANLI_TAVAN } from "../lib/kisitlar";
 import { IplikHavuzu } from "./IplikHavuzu";
+import { GorevListesi } from "./GorevListesi";
 
 interface Props {
   tezgahId: string;
@@ -23,7 +24,9 @@ export function TezgahDetay({ tezgahId, onGeri, onCozguAc }: Props) {
   const [cozguler, setCozguler] = useState<Cozgu[]>([]);
   const [form, setForm] = useState<Partial<Cozgu>>(bosCozgu);
   const [ekleAcik, setEkleAcik] = useState(false);
-  const [sekme, setSekme] = useState<"cozguler" | "iplikler">("cozguler");
+  const [sekme, setSekme] = useState<"cozguler" | "iplikler" | "gorevler">(
+    "cozguler",
+  );
   const [hata, setHata] = useState<string | null>(null);
 
   async function yukle() {
@@ -134,9 +137,16 @@ export function TezgahDetay({ tezgahId, onGeri, onCozguAc }: Props) {
         >
           Denenebilecek İplikler
         </button>
+        <button
+          className={sekme === "gorevler" ? "aktif" : ""}
+          onClick={() => setSekme("gorevler")}
+        >
+          Görevler
+        </button>
       </nav>
 
       {sekme === "iplikler" && tezgah && <IplikHavuzu tezgahId={tezgahId} />}
+      {sekme === "gorevler" && tezgah && <GorevListesi tezgahId={tezgahId} />}
 
       {sekme === "cozguler" && (
       <>

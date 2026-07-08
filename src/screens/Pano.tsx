@@ -1,12 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   cozguApi,
+  gorevApi,
   iplikApi,
   numuneApi,
   orguSnapshotApi,
   tezgahApi,
 } from "../api/client";
-import type { Cozgu, Iplik, Numune, OrguSnapshot, Tezgah } from "../lib/types";
+import type {
+  Cozgu,
+  Gorev,
+  Iplik,
+  Numune,
+  OrguSnapshot,
+  Tezgah,
+} from "../lib/types";
 import { hesaplaMetraj } from "../lib/metraj";
 import { numuneKisitlari, uyariSayisi } from "../lib/kisitlar";
 import { renkAdiBul } from "../lib/palette";
@@ -50,6 +58,7 @@ export function Pano({ onCozguAc }: Props) {
   const [numuneler, setNumuneler] = useState<Numune[]>([]);
   const [snapshotlar, setSnapshotlar] = useState<OrguSnapshot[]>([]);
   const [iplikler, setIplikler] = useState<Iplik[]>([]);
+  const [gorevler, setGorevler] = useState<Gorev[]>([]);
   const [hata, setHata] = useState<string | null>(null);
   const [suru, setSuru] = useState<Suru>(null);
   const [hedef, setHedef] = useState<string | null>(null); // vurgulanan drop hedefi
@@ -58,18 +67,20 @@ export function Pano({ onCozguAc }: Props) {
 
   async function yukle() {
     try {
-      const [t, c, n, s, ip] = await Promise.all([
+      const [t, c, n, s, ip, gv] = await Promise.all([
         tezgahApi.list(),
         cozguApi.listAll(),
         numuneApi.listAll(),
         orguSnapshotApi.listAll(),
         iplikApi.listAll(),
+        gorevApi.listAll(),
       ]);
       setTezgahlar(t);
       setCozguler(c);
       setNumuneler(n);
       setSnapshotlar(s);
       setIplikler(ip);
+      setGorevler(gv);
       setHata(null);
     } catch (e) {
       setHata((e as Error).message);
@@ -400,6 +411,8 @@ export function Pano({ onCozguAc }: Props) {
       {tezgahlar.map((t) => {
         const kolonCozguleri = cozgulerinTezgahi(t.id);
         const kolonIplikleri = iplikHaritasi.get(t.id) ?? [];
+        const tGorev = gorevler.filter((g) => g.tezgahId === t.id);
+        const acikGorev = tGorev.filter((g) => !g.tamamlandi).length;
         const aktif = aktifSayisi(t.id);
         const asim = aktif > t.esZamanliCozgu;
         return (
@@ -430,9 +443,27 @@ export function Pano({ onCozguAc }: Props) {
                 Aktif {aktif}/{t.esZamanliCozgu}
               </span>
             </h3>
-            <div className="mut" style={{ fontSize: 12, margin: "0 3px 6px" }}>
+            <div
+              className="mut"
+              style={{
+                fontSize: 12,
+                margin: "0 3px 6px",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                flexWrap: "wrap",
+              }}
+            >
               {kolonCozguleri.length} çözgü · {t.cerceveSayisi}çrç ·{" "}
-              {t.mekikSayisi}mkk · sağ-tık: hızlı ekle
+              {t.mekikSayisi}mkk
+              {tGorev.length > 0 && (
+                <span
+                  className={`gorev-ozet${acikGorev > 0 ? " acik" : ""}`}
+                  title="Açık görev / toplam"
+                >
+                  ✓ {tGorev.length - acikGorev}/{tGorev.length} görev
+                </span>
+              )}
             </div>
 
             {kolonIplikleri.length > 0 && (

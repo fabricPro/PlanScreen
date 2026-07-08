@@ -4,6 +4,7 @@ import { TezgahListe } from "./screens/TezgahListe";
 import { TezgahDetay } from "./screens/TezgahDetay";
 import { CozguDetay } from "./screens/CozguDetay";
 import { OrguImport } from "./screens/OrguImport";
+import { GorevPano } from "./screens/GorevPano";
 
 // Gezinme:
 // - "pano": ortak tezgah-şerit panosu (Faz 2 ana ekran)
@@ -13,6 +14,7 @@ type Gorunum =
   | { ad: "pano" }
   | { ad: "liste" }
   | { ad: "orguler" }
+  | { ad: "gorevler" }
   | { ad: "tezgah"; tezgahId: string }
   | {
       ad: "cozgu";
@@ -30,7 +32,9 @@ export default function App() {
       ? "pano"
       : gorunum.ad === "orguler"
         ? "orguler"
-        : "liste";
+        : gorunum.ad === "gorevler"
+          ? "gorevler"
+          : "liste";
 
   return (
     <>
@@ -53,6 +57,12 @@ export default function App() {
           Liste
         </button>
         <button
+          className={sekme === "gorevler" ? "aktif" : ""}
+          onClick={() => setGorunum({ ad: "gorevler" })}
+        >
+          Görevler
+        </button>
+        <button
           className={sekme === "orguler" ? "aktif" : ""}
           onClick={() => setGorunum({ ad: "orguler" })}
         >
@@ -60,6 +70,7 @@ export default function App() {
         </button>
       </nav>
 
+      {gorunum.ad === "gorevler" && <GorevPano />}
       {gorunum.ad === "orguler" && <OrguImport />}
 
       {gorunum.ad === "pano" && (

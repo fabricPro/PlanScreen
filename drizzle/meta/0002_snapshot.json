@@ -1,0 +1,590 @@
+{
+  "id": "bb82c824-c849-43e7-8552-1d1994ca78b0",
+  "prevId": "e984fbdd-0590-4eb0-8080-95989131c9ca",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.ndp_cozgu": {
+      "name": "ndp_cozgu",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "tezgah_id": {
+          "name": "tezgah_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ad_kod": {
+          "name": "ad_kod",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "iplik": {
+          "name": "iplik",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tarak_no": {
+          "name": "tarak_no",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cozgu_sikligi": {
+          "name": "cozgu_sikligi",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "toplam_tel": {
+          "name": "toplam_tel",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cozgu_boyu_m": {
+          "name": "cozgu_boyu_m",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tahar_tipi": {
+          "name": "tahar_tipi",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cerceve_kullanim": {
+          "name": "cerceve_kullanim",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "renk_dizimi": {
+          "name": "renk_dizimi",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tezgah_sira": {
+          "name": "tezgah_sira",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "durum": {
+          "name": "durum",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'taslak'"
+        },
+        "notlar": {
+          "name": "notlar",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "ndp_cozgu_tezgah_id_ndp_tezgah_id_fk": {
+          "name": "ndp_cozgu_tezgah_id_ndp_tezgah_id_fk",
+          "tableFrom": "ndp_cozgu",
+          "tableTo": "ndp_tezgah",
+          "columnsFrom": [
+            "tezgah_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ndp_gorev": {
+      "name": "ndp_gorev",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "tezgah_id": {
+          "name": "tezgah_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parent_id": {
+          "name": "parent_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "baslik": {
+          "name": "baslik",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tamamlandi": {
+          "name": "tamamlandi",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "sira": {
+          "name": "sira",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "ndp_gorev_tezgah_id_ndp_tezgah_id_fk": {
+          "name": "ndp_gorev_tezgah_id_ndp_tezgah_id_fk",
+          "tableFrom": "ndp_gorev",
+          "tableTo": "ndp_tezgah",
+          "columnsFrom": [
+            "tezgah_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ndp_iplik": {
+      "name": "ndp_iplik",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "tezgah_id": {
+          "name": "tezgah_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ad": {
+          "name": "ad",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tip": {
+          "name": "tip",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "renk": {
+          "name": "renk",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "renk_adi": {
+          "name": "renk_adi",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "numara": {
+          "name": "numara",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "notlar": {
+          "name": "notlar",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "ndp_iplik_tezgah_id_ndp_tezgah_id_fk": {
+          "name": "ndp_iplik_tezgah_id_ndp_tezgah_id_fk",
+          "tableFrom": "ndp_iplik",
+          "tableTo": "ndp_tezgah",
+          "columnsFrom": [
+            "tezgah_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ndp_numune": {
+      "name": "ndp_numune",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "cozgu_id": {
+          "name": "cozgu_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ad_kod": {
+          "name": "ad_kod",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "atki_iplikleri": {
+          "name": "atki_iplikleri",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "atki_sikligi": {
+          "name": "atki_sikligi",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "orgu_snapshot_id": {
+          "name": "orgu_snapshot_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "atki_renk_dizisi": {
+          "name": "atki_renk_dizisi",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tahmini_boy_m": {
+          "name": "tahmini_boy_m",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "durum": {
+          "name": "durum",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'taslak'"
+        },
+        "arge_talep_kodu": {
+          "name": "arge_talep_kodu",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "arge_talep_url": {
+          "name": "arge_talep_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fas_ilham_url": {
+          "name": "fas_ilham_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sira_no": {
+          "name": "sira_no",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "notlar": {
+          "name": "notlar",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "ndp_numune_cozgu_id_ndp_cozgu_id_fk": {
+          "name": "ndp_numune_cozgu_id_ndp_cozgu_id_fk",
+          "tableFrom": "ndp_numune",
+          "tableTo": "ndp_cozgu",
+          "columnsFrom": [
+            "cozgu_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "ndp_numune_orgu_snapshot_id_ndp_orgu_snapshot_id_fk": {
+          "name": "ndp_numune_orgu_snapshot_id_ndp_orgu_snapshot_id_fk",
+          "tableFrom": "ndp_numune",
+          "tableTo": "ndp_orgu_snapshot",
+          "columnsFrom": [
+            "orgu_snapshot_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ndp_orgu_snapshot": {
+      "name": "ndp_orgu_snapshot",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "kaynak": {
+          "name": "kaynak",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "kaynak_id": {
+          "name": "kaynak_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "kaynak_versiyon": {
+          "name": "kaynak_versiyon",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cerceve_sayisi": {
+          "name": "cerceve_sayisi",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tahar_tipi": {
+          "name": "tahar_tipi",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "weavex_json": {
+          "name": "weavex_json",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ad": {
+          "name": "ad",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "olusturma_ts": {
+          "name": "olusturma_ts",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ndp_tezgah": {
+      "name": "ndp_tezgah",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "ad": {
+          "name": "ad",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "marka": {
+          "name": "marka",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tip": {
+          "name": "tip",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cerceve_sayisi": {
+          "name": "cerceve_sayisi",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "max_tarak_eni_cm": {
+          "name": "max_tarak_eni_cm",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mekik_sayisi": {
+          "name": "mekik_sayisi",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "eszamanli_cozgu": {
+          "name": "eszamanli_cozgu",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 2
+        },
+        "devir": {
+          "name": "devir",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "durum": {
+          "name": "durum",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'bos'"
+        },
+        "notlar": {
+          "name": "notlar",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

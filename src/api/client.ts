@@ -1,4 +1,11 @@
-import type { Cozgu, Iplik, Numune, OrguSnapshot, Tezgah } from "../lib/types";
+import type {
+  Cozgu,
+  Gorev,
+  Iplik,
+  Numune,
+  OrguSnapshot,
+  Tezgah,
+} from "../lib/types";
 import type { WeaveXSnapshotGirdi } from "../lib/weavex";
 
 const BASE = "/api";
@@ -63,6 +70,17 @@ export const iplikApi = {
   update: (id: string, b: Partial<Iplik>) =>
     req<Iplik>(`iplik?id=${id}`, "PUT", b),
   remove: (id: string) => req<{ silindi: string }>(`iplik?id=${id}`, "DELETE"),
+};
+
+// Görev (to-do) — tezgaha ait, çok seviyeli
+export const gorevApi = {
+  listAll: () => req<Gorev[]>("gorev", "GET"),
+  listByTezgah: (tezgahId: string) =>
+    req<Gorev[]>(`gorev?tezgahId=${tezgahId}`, "GET"),
+  create: (b: Partial<Gorev>) => req<Gorev>("gorev", "POST", b),
+  update: (id: string, b: Partial<Gorev>) =>
+    req<Gorev>(`gorev?id=${id}`, "PUT", b),
+  remove: (id: string) => req<{ silindi: string }>(`gorev?id=${id}`, "DELETE"),
 };
 
 // Örgü snapshot (immutable import — PUT yok)

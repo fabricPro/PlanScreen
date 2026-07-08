@@ -46,6 +46,17 @@ export interface AtkiIplikRef {
   renk: string; // hex
 }
 
+// Tezgaha ait yapılacak (to-do) — çok seviyeli (parentId self-ref).
+export interface Gorev {
+  id: string;
+  tezgahId: string;
+  parentId: string | null;
+  baslik: string;
+  tamamlandi: boolean;
+  sira: number;
+  createdAt: string;
+}
+
 // Tezgaha ait atkı ipliği havuzu.
 export interface Iplik {
   id: string;

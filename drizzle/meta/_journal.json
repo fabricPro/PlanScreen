@@ -15,6 +15,13 @@
       "when": 1783473569929,
       "tag": "0001_robust_grim_reaper",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1783514035305,
+      "tag": "0002_silky_pride",
+      "breakpoints": true
     }
   ]
 }
