@@ -6,6 +6,7 @@ import {
   numeric,
   jsonb,
   timestamp,
+  boolean,
 } from "drizzle-orm/pg-core";
 
 // NDP çekirdek hiyerarşi: Tezgah 1─N Çözgü 1─N Numune.
@@ -88,6 +89,21 @@ export const ndpIplik = pgTable("ndp_iplik", {
     .defaultNow(),
 });
 
+// Tezgaha ait yapılacaklar (to-do) — çok seviyeli (parent_id self-ref).
+export const ndpGorev = pgTable("ndp_gorev", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  tezgahId: uuid("tezgah_id")
+    .notNull()
+    .references(() => ndpTezgah.id, { onDelete: "cascade" }),
+  parentId: uuid("parent_id"), // self-ref (alt görev); FK migration'da eklenir
+  baslik: text("baslik").notNull(),
+  tamamlandi: boolean("tamamlandi").notNull().default(false),
+  sira: integer("sira").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 export const ndpNumune = pgTable("ndp_numune", {
   id: uuid("id").primaryKey().defaultRandom(),
   cozguId: uuid("cozgu_id")
@@ -124,3 +140,5 @@ export type YeniNumune = typeof ndpNumune.$inferInsert;
 export type OrguSnapshot = typeof ndpOrguSnapshot.$inferSelect;
 export type Iplik = typeof ndpIplik.$inferSelect;
 export type YeniIplik = typeof ndpIplik.$inferInsert;
+export type Gorev = typeof ndpGorev.$inferSelect;
+export type YeniGorev = typeof ndpGorev.$inferInsert;

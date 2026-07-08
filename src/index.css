@@ -896,6 +896,84 @@ select.tasi {
   border-radius: 999px;
 }
 
+/* ---------- Görev (to-do) ağacı ---------- */
+.gorev-dugum {
+  margin-bottom: 2px;
+}
+.gorev-alt {
+  margin-left: 22px;
+  border-left: 2px solid var(--border);
+  padding-left: 10px;
+}
+.gorev-satir {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 6px;
+  border-radius: 8px;
+  transition: background 0.12s ease;
+}
+.gorev-satir:hover {
+  background: var(--surface-2);
+}
+.gorev-check {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  accent-color: var(--ok);
+  cursor: pointer;
+}
+.gorev-baslik {
+  flex: 1;
+  min-width: 0;
+  font-weight: 500;
+}
+.gorev-satir.bitti .gorev-baslik {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+.gorev-ilerleme {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-soft);
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  padding: 1px 8px;
+  border-radius: 999px;
+}
+.gorev-satir .small {
+  padding: 3px 8px;
+  font-size: 0.74rem;
+}
+.gorev-ekle {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.gorev-ekle input {
+  flex: 1;
+}
+.gorev-grup {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px;
+}
+.gorev-ozet {
+  font-size: 0.72rem;
+  font-weight: 650;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-soft);
+  white-space: nowrap;
+}
+.gorev-ozet.acik {
+  color: var(--amber);
+  border-color: color-mix(in srgb, var(--amber) 40%, transparent);
+}
+
 /* ---------- Mobil / tablet ---------- */
 @media (max-width: 640px) {
   #root {
