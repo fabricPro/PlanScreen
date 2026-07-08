@@ -127,6 +127,14 @@ export function TezgahDuzenle({ tezgah, x, y, onKapat, onKaydedildi }: Props) {
               />
             </div>
             <div>
+              <label>Takım bilgisi</label>
+              <input
+                placeholder="ör. 8+2 sıra tahar 15 sıklık"
+                value={form.takim ?? ""}
+                onChange={(e) => setForm({ ...form, takim: e.target.value })}
+              />
+            </div>
+            <div>
               <label>Marka</label>
               <input
                 value={form.marka ?? ""}
@@ -224,14 +232,6 @@ export function TezgahDuzenle({ tezgah, x, y, onKapat, onKaydedildi }: Props) {
                       : null,
                   })
                 }
-              />
-            </div>
-            <div style={{ gridColumn: "1 / -1" }}>
-              <label>Takım bilgisi</label>
-              <input
-                placeholder="ör. 8+2 sıra tahar 15 sıklık"
-                value={form.takim ?? ""}
-                onChange={(e) => setForm({ ...form, takim: e.target.value })}
               />
             </div>
           </div>
