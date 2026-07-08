@@ -15,6 +15,8 @@ import type {
   OrguSnapshot,
   Tezgah,
 } from "../lib/types";
+import { ONCELIKLER } from "../lib/types";
+import { tarihDurum } from "../lib/gorev";
 import { hesaplaMetraj } from "../lib/metraj";
 import { numuneKisitlari, uyariSayisi } from "../lib/kisitlar";
 import { renkAdiBul } from "../lib/palette";
@@ -96,6 +98,11 @@ export function Pano({ onCozguAc }: Props) {
     y: number;
   } | null>(null);
   const [tezgahIpucu, setTezgahIpucu] = useState<{
+    tezgah: Tezgah;
+    x: number;
+    y: number;
+  } | null>(null);
+  const [gorevIpucu, setGorevIpucu] = useState<{
     tezgah: Tezgah;
     x: number;
     y: number;
@@ -756,7 +763,11 @@ export function Pano({ onCozguAc }: Props) {
               {tGorev.length > 0 && (
                 <span
                   className={`gorev-ozet${acikGorev > 0 ? " acik" : ""}`}
-                  title="Açık görev / toplam"
+                  title="Görevleri gör (üzerine gelin)"
+                  onMouseEnter={(e) =>
+                    setGorevIpucu({ tezgah: t, x: e.clientX, y: e.clientY })
+                  }
+                  onMouseLeave={() => setGorevIpucu(null)}
                 >
                   ✓ {tGorev.length - acikGorev}/{tGorev.length} görev
                 </span>
@@ -996,6 +1007,71 @@ export function Pano({ onCozguAc }: Props) {
           </div>
         </div>
       )}
+      {gorevIpucu &&
+        (() => {
+          const kokler = gorevler
+            .filter(
+              (g) => g.tezgahId === gorevIpucu.tezgah.id && !g.parentId,
+            )
+            .sort((a, b) => {
+              if (a.tamamlandi !== b.tamamlandi) return a.tamamlandi ? 1 : -1;
+              if (b.oncelik !== a.oncelik) return b.oncelik - a.oncelik;
+              const at = a.sonTarih ?? "9999";
+              const bt = b.sonTarih ?? "9999";
+              if (at !== bt) return at < bt ? -1 : 1;
+              return a.createdAt.localeCompare(b.createdAt);
+            });
+          const biten = kokler.filter((g) => g.tamamlandi).length;
+          return (
+            <div
+              className="gorev-ipucu"
+              style={{
+                left: Math.min(gorevIpucu.x + 14, window.innerWidth - 320),
+                top: Math.min(gorevIpucu.y + 12, window.innerHeight - 320),
+              }}
+            >
+              <div className="ipucu-baslik">
+                {gorevIpucu.tezgah.ad} · {biten}/{kokler.length} tamamlandı
+              </div>
+              {kokler.length === 0 ? (
+                <div className="mut">Görev yok</div>
+              ) : (
+                kokler.map((g) => {
+                  const onc =
+                    ONCELIKLER.find((o) => o.deger === g.oncelik) ??
+                    ONCELIKLER[1];
+                  const tDurum = tarihDurum(g.sonTarih);
+                  const tKisa = tarihKisa(g.sonTarih);
+                  const alt = gorevler.filter((x) => x.parentId === g.id);
+                  const altBiten = alt.filter((x) => x.tamamlandi).length;
+                  return (
+                    <div
+                      key={g.id}
+                      className={`gorev-ipucu-satir${g.tamamlandi ? " bitti" : ""}`}
+                    >
+                      <span
+                        className="oncelik-nokta"
+                        style={{ background: onc.renk }}
+                      />
+                      <span className="gi-im">{g.tamamlandi ? "✓" : "○"}</span>
+                      <span className="gi-baslik">{g.baslik}</span>
+                      {alt.length > 0 && (
+                        <span className="gorev-ilerleme">
+                          {altBiten}/{alt.length}
+                        </span>
+                      )}
+                      {tKisa && (
+                        <span className={`gorev-tarih ${tDurum ?? ""}`}>
+                          {tKisa}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          );
+        })()}
       </div>
     </>
   );

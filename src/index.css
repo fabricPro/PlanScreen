@@ -916,6 +916,54 @@ select.tasi {
   border-radius: var(--radius-sm);
 }
 
+/* Görev-özet hover pop (tezgahın görevleri) */
+.gorev-ipucu {
+  position: fixed;
+  z-index: 90;
+  min-width: 220px;
+  max-width: 340px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  pointer-events: none;
+}
+.gorev-ipucu .ipucu-baslik {
+  font-weight: 700;
+  font-size: 0.8rem;
+  margin-bottom: 6px;
+  color: var(--text-soft);
+}
+.gorev-ipucu-satir {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 0;
+  font-size: 0.82rem;
+}
+.gorev-ipucu-satir .gi-im {
+  color: var(--muted);
+  font-size: 0.78rem;
+  flex: 0 0 auto;
+}
+.gorev-ipucu-satir .gi-baslik {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.gorev-ipucu-satir.bitti .gi-baslik {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+.gorev-ipucu-satir.bitti .gi-im {
+  color: var(--ok);
+}
+
 /* Numune detay/düzenle penceresi (taşınabilir · boyutlandırılabilir) */
 .numune-detay {
   position: fixed;
