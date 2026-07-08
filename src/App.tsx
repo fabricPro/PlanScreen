@@ -55,6 +55,12 @@ export default function App() {
           Pano
         </button>
         <button
+          className={sekme === "gorevler" ? "aktif" : ""}
+          onClick={() => setGorunum({ ad: "gorevler" })}
+        >
+          Görevler
+        </button>
+        <button
           className={sekme === "cizelge" ? "aktif" : ""}
           onClick={() => setGorunum({ ad: "cizelge" })}
         >
@@ -65,12 +71,6 @@ export default function App() {
           onClick={() => setGorunum({ ad: "liste" })}
         >
           Liste
-        </button>
-        <button
-          className={sekme === "gorevler" ? "aktif" : ""}
-          onClick={() => setGorunum({ ad: "gorevler" })}
-        >
-          Görevler
         </button>
         <button
           className={sekme === "orguler" ? "aktif" : ""}
