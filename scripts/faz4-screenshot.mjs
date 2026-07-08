@@ -74,11 +74,22 @@ await page.keyboard.press("Escape");
 // 2) Tezgah detayı: kapasite + iplik havuzu
 await page.click("nav.tabs >> text=Liste");
 await page.click("span.kod:has-text('Stäubli-1'), .card:has-text('Stäubli-1')");
-await page.waitForSelector("text=İplik havuzu");
+await page.waitForSelector("text=Denenebilecek İplikler");
 await page.waitForTimeout(200);
 await page.screenshot({ path: "scripts/faz4-tezgah.png", fullPage: true });
 
+// 2b) Çözgü detayı: Düzenle + numune kartında iplik chip'leri
+await page.click("span.kod:has-text('ÇZG-A'), .card:has-text('ÇZG-A')");
+await page.waitForSelector("text=Numuneler");
+await page.waitForTimeout(200);
+await page.screenshot({ path: "scripts/faz4-cozgu.png", fullPage: true });
+await page.click("nav.tabs >> text=Liste");
+await page.click("span.kod:has-text('Stäubli-1'), .card:has-text('Stäubli-1')");
+await page.waitForSelector("text=Denenebilecek İplikler");
+
 // 3) Perde paleti + ton menüsü (gerçek basılı-tut simülasyonu)
+await page.click("nav.tabs >> text=Denenebilecek İplikler");
+await page.waitForSelector("text=+ İplik ekle");
 await page.click("text=+ İplik ekle");
 await page.click(".renk-tetik");
 await page.waitForSelector(".renk-pop");

@@ -63,7 +63,7 @@ export function IplikHavuzu({ tezgahId, yenile = 0 }: Props) {
 
   return (
     <div className="panel">
-      <h3>İplik havuzu ({liste.length})</h3>
+      <h3>Denenebilecek iplikler ({liste.length})</h3>
       <p className="mut" style={{ fontSize: "0.86rem", marginTop: 0 }}>
         Bu tezgahta denenebilecek atkı iplikleri. Numune eklerken buradan seçilir.
       </p>
