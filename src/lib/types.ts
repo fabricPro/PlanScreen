@@ -38,6 +38,8 @@ export interface Tezgah {
   sira: number; // pano sıralaması
   devir: number | null;
   durum: string;
+  takim: string | null; // takım bilgisi (ör. "8+2 sıra tahar 15 sıklık")
+  aciklama: string | null; // biçimli (mini-markdown) serbest açıklama
   notlar: string | null;
   createdAt: string;
 }

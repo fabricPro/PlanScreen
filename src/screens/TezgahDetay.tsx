@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { cozguApi, tezgahApi } from "../api/client";
 import type { Cozgu, Tezgah } from "../lib/types";
 import { ESZAMANLI_TAVAN } from "../lib/kisitlar";
+import { formatlaAciklama } from "../lib/aciklama";
 import { IplikHavuzu } from "./IplikHavuzu";
 import { GorevListesi } from "./GorevListesi";
 
@@ -106,8 +107,22 @@ export function TezgahDetay({ tezgahId, onGeri, onCozguAc }: Props) {
           <div className="meta mut">
             {tezgah.marka ?? "—"} · {tezgah.tip ?? "—"} ·{" "}
             {tezgah.cerceveSayisi} çerçeve · {tezgah.mekikSayisi} mekik ·{" "}
+            {tezgah.maxTarakEniCm ? `${tezgah.maxTarakEniCm}cm eni · ` : ""}
             <span className="badge">{tezgah.durum}</span>
           </div>
+          {tezgah.takim && (
+            <div className="tezgah-takim" style={{ marginTop: 8 }}>
+              🧰 {tezgah.takim}
+            </div>
+          )}
+          {tezgah.aciklama && tezgah.aciklama.trim() && (
+            <div className="bicimli kart-aciklama" style={{ marginTop: 8 }}>
+              {formatlaAciklama(tezgah.aciklama)}
+            </div>
+          )}
+          <p className="mut" style={{ fontSize: "0.78rem", marginTop: 8 }}>
+            Tüm alanları düzenlemek için panoda tezgaha sağ-tık → “Detay / düzenle”.
+          </p>
           <div
             className="actions"
             style={{ marginTop: 12, alignItems: "center", gap: 8 }}

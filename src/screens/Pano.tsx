@@ -31,6 +31,7 @@ import type { MenuOge } from "./BaglamMenu";
 import { HizliForm } from "./HizliForm";
 import type { HizliAlan } from "./HizliForm";
 import { NumuneDetay } from "./NumuneDetay";
+import { TezgahDuzenle } from "./TezgahDuzenle";
 import { formatlaAciklama } from "../lib/aciklama";
 
 interface Props {
@@ -86,6 +87,16 @@ export function Pano({ onCozguAc }: Props) {
   } | null>(null);
   const [ipucu, setIpucu] = useState<{
     numune: Numune;
+    x: number;
+    y: number;
+  } | null>(null);
+  const [tezgahDetay, setTezgahDetay] = useState<{
+    tezgah: Tezgah;
+    x: number;
+    y: number;
+  } | null>(null);
+  const [tezgahIpucu, setTezgahIpucu] = useState<{
+    tezgah: Tezgah;
     x: number;
     y: number;
   } | null>(null);
@@ -373,24 +384,60 @@ export function Pano({ onCozguAc }: Props) {
     calis(() => numuneApi.remove(n.id));
   }
 
+  function hizliGorev(tezgahId: string, x: number, y: number) {
+    setHizli({
+      x,
+      y,
+      baslik: "Hızlı görev",
+      alanlar: [
+        { ad: "baslik", etiket: "Görev", placeholder: "Yapılacak…" },
+        { ad: "sonTarih", etiket: "Termin", tip: "date" },
+      ],
+      onKaydet: (d) => {
+        if (d.baslik?.trim())
+          calis(() =>
+            gorevApi.create({
+              tezgahId,
+              baslik: d.baslik.trim(),
+              sonTarih: d.sonTarih
+                ? new Date(d.sonTarih).toISOString()
+                : null,
+            }),
+          );
+        setHizli(null);
+      },
+    });
+  }
+
   function tezgahMenu(t: Tezgah, e: React.MouseEvent) {
     e.preventDefault();
+    const x = e.clientX;
+    const y = e.clientY;
     setMenu({
-      x: e.clientX,
-      y: e.clientY,
+      x,
+      y,
       ogeler: [
         {
+          etiket: "Detay / düzenle (bu sayfada)",
+          onSec: () => setTezgahDetay({ tezgah: t, x, y }),
+        },
+        {
+          etiket: "＋ Görev ekle",
+          onSec: () => hizliGorev(t.id, x, y),
+        },
+        {
           etiket: "+ Hızlı çözgü",
-          onSec: () => hizliCozgu(t.id, e.clientX, e.clientY),
+          ayrac: true,
+          onSec: () => hizliCozgu(t.id, x, y),
         },
         {
           etiket: "+ Havuza iplik ekle",
-          onSec: () => hizliIplik(t.id, e.clientX, e.clientY),
+          onSec: () => hizliIplik(t.id, x, y),
         },
         {
           etiket: "Plan tarihi belirle",
           ayrac: true,
-          onSec: () => planTarihiBelirle(t, e.clientX, e.clientY),
+          onSec: () => planTarihiBelirle(t, x, y),
         },
         {
           etiket: "✓ Plan tamamlandı → Arşive al",
@@ -690,6 +737,22 @@ export function Pano({ onCozguAc }: Props) {
             >
               {kolonCozguleri.length} çözgü · {t.cerceveSayisi}çrç ·{" "}
               {t.mekikSayisi}mkk
+              {t.aciklama && t.aciklama.trim() && (
+                <span
+                  className="aciklama-im"
+                  title="Açıklama var (üzerine gelin)"
+                  onMouseEnter={(e) =>
+                    setTezgahIpucu({
+                      tezgah: t,
+                      x: e.clientX,
+                      y: e.clientY,
+                    })
+                  }
+                  onMouseLeave={() => setTezgahIpucu(null)}
+                >
+                  ✎
+                </span>
+              )}
               {tGorev.length > 0 && (
                 <span
                   className={`gorev-ozet${acikGorev > 0 ? " acik" : ""}`}
@@ -699,6 +762,11 @@ export function Pano({ onCozguAc }: Props) {
                 </span>
               )}
             </div>
+            {t.takim && (
+              <div className="tezgah-takim" title="Takım bilgisi">
+                🧰 {t.takim}
+              </div>
+            )}
 
             {kolonIplikleri.length > 0 && (
               <div className="serit-iplik" title="İplik havuzu">
@@ -902,6 +970,29 @@ export function Pano({ onCozguAc }: Props) {
           <div className="ipucu-baslik">{ipucu.numune.adKod}</div>
           <div className="bicimli">
             {formatlaAciklama(ipucu.numune.aciklama)}
+          </div>
+        </div>
+      )}
+      {tezgahDetay && (
+        <TezgahDuzenle
+          tezgah={tezgahDetay.tezgah}
+          x={tezgahDetay.x}
+          y={tezgahDetay.y}
+          onKapat={() => setTezgahDetay(null)}
+          onKaydedildi={yukle}
+        />
+      )}
+      {tezgahIpucu && (
+        <div
+          className="numune-ipucu"
+          style={{
+            left: Math.min(tezgahIpucu.x + 14, window.innerWidth - 340),
+            top: Math.min(tezgahIpucu.y + 12, window.innerHeight - 220),
+          }}
+        >
+          <div className="ipucu-baslik">{tezgahIpucu.tezgah.ad}</div>
+          <div className="bicimli">
+            {formatlaAciklama(tezgahIpucu.tezgah.aciklama)}
           </div>
         </div>
       )}

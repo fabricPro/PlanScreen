@@ -43,6 +43,13 @@
       "when": 1783530824243,
       "tag": "0005_gorev_todo",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1783533142681,
+      "tag": "0006_tezgah_takim_aciklama",
+      "breakpoints": true
     }
   ]
 }

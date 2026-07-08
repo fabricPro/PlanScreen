@@ -208,6 +208,14 @@ export function TezgahListe({ onAc }: Props) {
                 }
               />
             </div>
+            <div>
+              <label>Takım bilgisi</label>
+              <input
+                placeholder="ör. 8+2 sıra tahar 15 sıklık"
+                value={form.takim ?? ""}
+                onChange={(e) => setForm({ ...form, takim: e.target.value })}
+              />
+            </div>
           </div>
           <div className="actions">
             <button className="primary" onClick={kaydet}>

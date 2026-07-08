@@ -30,6 +30,8 @@ export const ndpTezgah = pgTable("ndp_tezgah", {
   sira: integer("sira").notNull().default(0), // pano sıralaması
   devir: integer("devir"),
   durum: text("durum").notNull().default("bos"), // bos | dolu | bakim
+  takim: text("takim"), // takım bilgisi (ör. "8+2 sıra tahar 15 sıklık")
+  aciklama: text("aciklama"), // biçimli (mini-markdown) serbest açıklama
   notlar: text("notlar"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()

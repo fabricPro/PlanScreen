@@ -1274,6 +1274,20 @@ select.tasi {
   border-radius: 999px;
   margin: 0 2px 8px;
 }
+.tezgah-takim {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--primary);
+  background: var(--primary-soft);
+  border: 1px solid color-mix(in srgb, var(--primary) 25%, transparent);
+  padding: 3px 10px;
+  border-radius: 8px;
+  margin: 0 3px 8px;
+  max-width: calc(100% - 6px);
+}
 .katla {
   padding: 1px 6px;
   font-size: 0.8rem;
