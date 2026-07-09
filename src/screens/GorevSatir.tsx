@@ -12,6 +12,9 @@ interface Props {
   numuneler: Numune[];
   onDegisti: () => void;
   onAc?: (cozguId: string) => void;
+  // Bağlam (tezgah/çözgü alt-başlığı) zaten gösteriyorsa çipleri gizle.
+  gizleTezgah?: boolean;
+  gizleCozgu?: boolean;
 }
 
 // Bir tezgahın çözgüleri (tezgah sırasına göre).
@@ -33,6 +36,8 @@ export function GorevSatir({
   numuneler,
   onDegisti,
   onAc,
+  gizleTezgah,
+  gizleCozgu,
 }: Props) {
   const [duzenle, setDuzenle] = useState(false);
   const [altAcik, setAltAcik] = useState(false);
@@ -114,11 +119,13 @@ export function GorevSatir({
           checked={g.tamamlandi}
           onChange={toggle}
         />
-        <span
-          className="oncelik-nokta"
-          style={{ background: onc.renk }}
-          title={`Öncelik: ${onc.ad}`}
-        />
+        {g.oncelik !== 1 && (
+          <span
+            className="oncelik-nokta"
+            style={{ background: onc.renk }}
+            title={`Öncelik: ${onc.ad}`}
+          />
+        )}
         <span className="gorev-baslik">{g.baslik}</span>
 
         {tarKisa && (
@@ -126,12 +133,12 @@ export function GorevSatir({
             📅 {tarKisa}
           </span>
         )}
-        {tezgahAd && (
+        {!gizleTezgah && tezgahAd && (
           <span className="badge gorev-bag" title="Bağlı tezgah">
             🧵 {tezgahAd}
           </span>
         )}
-        {cozgu && (
+        {!gizleCozgu && cozgu && (
           <span
             className="badge gorev-bag tiklanir"
             title="Bağlı çözgü — aç"

@@ -1422,7 +1422,7 @@ select.tasi {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 6px;
+  padding: 7px 8px;
   border-radius: 8px;
   transition: background 0.12s ease;
 }
@@ -1490,24 +1490,55 @@ select.tasi {
 /* ---------- Görevler (to-do listesi) ---------- */
 .gorev-ekle-bar {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-  padding: 12px;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 12px;
   margin-bottom: 14px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
 }
-.gorev-ekle-bar .gorev-ekle-baslik {
-  flex: 1 1 220px;
-  min-width: 160px;
+.gorev-ekle-satir {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
-.gorev-ekle-bar input[type="date"],
-.gorev-ekle-bar select {
-  width: auto;
+.gorev-ekle-bar .gorev-ekle-baslik {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.gorev-detay-ac {
   flex: 0 0 auto;
+  padding: 7px 12px;
+  font-size: 0.82rem;
+  color: var(--text-soft);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+.gorev-detay-ac.aktif {
+  color: var(--primary);
+  border-color: color-mix(in srgb, var(--primary) 40%, transparent);
+}
+.gorev-ekle-detay {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.gorev-ekle-detay label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.74rem;
+  color: var(--text-soft);
+}
+.gorev-ekle-detay input[type="date"],
+.gorev-ekle-detay select {
+  width: auto;
 }
 .gorev-ust-arac {
   display: flex;
@@ -1639,6 +1670,18 @@ nav.tabs.mini button {
   display: inline-flex;
   gap: 3px;
   flex: 0 0 auto;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+.gorev-satir:hover .gorev-araclar,
+.gorev-satir:focus-within .gorev-araclar {
+  opacity: 1;
+}
+/* Dokunmatik / fare olmayan: araçları her zaman göster. */
+@media (hover: none) {
+  .gorev-araclar {
+    opacity: 1;
+  }
 }
 
 /* Satır-içi düzenleme */

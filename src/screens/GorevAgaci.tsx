@@ -12,6 +12,8 @@ interface Props {
   onDegisti: () => void;
   onAc?: (cozguId: string) => void;
   derinlik?: number;
+  gizleTezgah?: boolean;
+  gizleCozgu?: boolean;
 }
 
 export function GorevAgaci({
@@ -23,6 +25,8 @@ export function GorevAgaci({
   onDegisti,
   onAc,
   derinlik = 0,
+  gizleTezgah,
+  gizleCozgu,
 }: Props) {
   const cocuklar = gorevler
     .filter((g) => (g.parentId ?? null) === parentId)
@@ -45,6 +49,8 @@ export function GorevAgaci({
               numuneler={numuneler}
               onDegisti={onDegisti}
               onAc={onAc}
+              gizleTezgah={gizleTezgah}
+              gizleCozgu={gizleCozgu}
             />
             {/* Alt görevler (özyineleme) */}
             <GorevAgaci
@@ -56,6 +62,8 @@ export function GorevAgaci({
               onDegisti={onDegisti}
               onAc={onAc}
               derinlik={derinlik + 1}
+              gizleTezgah={gizleTezgah}
+              gizleCozgu={gizleCozgu}
             />
           </div>
         );

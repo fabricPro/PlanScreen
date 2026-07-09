@@ -20,6 +20,10 @@ export function Gorevler({ onAc }: Props) {
   const [hata, setHata] = useState<string | null>(null);
   const [gruplama, setGruplama] = useState<Gruplama>("tezgah");
   const [bitenGizle, setBitenGizle] = useState(false);
+  // Ekleme çubuğunda detay alanları (tarih/öncelik/bağ) açık mı.
+  const [detayAcik, setDetayAcik] = useState(false);
+  // Görevi olmayan çözgü alt-başlıklarını da göster.
+  const [bosCozguGoster, setBosCozguGoster] = useState(false);
 
   // Ekleme çubuğu formu
   const [yeni, setYeni] = useState<{
@@ -157,7 +161,11 @@ export function Gorevler({ onAc }: Props) {
   const toplamAcik = gorevler.filter((g) => !g.tamamlandi).length;
 
   // Kök görev listesini (satır + alt ağaç) çizer — çözgü blokları / düz liste ortak.
-  function rootlariCiz(rootlar: Gorev[]) {
+  // gizle: bağlamda (tezgah/çözgü alt-başlığı) zaten görünen çipleri satırda gizler.
+  function rootlariCiz(
+    rootlar: Gorev[],
+    gizle?: { tezgah?: boolean; cozgu?: boolean },
+  ) {
     return rootlar.map((root) => {
       const dogrudan = gorevler.filter((x) => x.parentId === root.id);
       const bitenAlt = dogrudan.filter((x) => x.tamamlandi).length;
@@ -171,6 +179,8 @@ export function Gorevler({ onAc }: Props) {
             numuneler={numuneler}
             onDegisti={yukle}
             onAc={onAc}
+            gizleTezgah={gizle?.tezgah}
+            gizleCozgu={gizle?.cozgu}
           />
           <GorevAgaci
             gorevler={gorevler}
@@ -181,6 +191,8 @@ export function Gorevler({ onAc }: Props) {
             onDegisti={yukle}
             onAc={onAc}
             derinlik={1}
+            gizleTezgah={gizle?.tezgah}
+            gizleCozgu={gizle?.cozgu}
           />
         </div>
       );
@@ -196,82 +208,108 @@ export function Gorevler({ onAc }: Props) {
 
       {hata && <p className="hata">⚠ {hata}</p>}
 
-      {/* Ekleme çubuğu */}
+      {/* Ekleme çubuğu — sade tek satır; detay istek üzerine açılır */}
       <div className="gorev-ekle-bar">
-        <input
-          className="gorev-ekle-baslik"
-          placeholder="Yeni görev…"
-          value={yeni.baslik}
-          onChange={(e) => setYeni({ ...yeni, baslik: e.target.value })}
-          onKeyDown={(e) => e.key === "Enter" && ekle()}
-        />
-        <input
-          type="date"
-          title="Son tarih"
-          value={yeni.sonTarih}
-          onChange={(e) => setYeni({ ...yeni, sonTarih: e.target.value })}
-        />
-        <select
-          title="Öncelik"
-          value={yeni.oncelik}
-          onChange={(e) => setYeni({ ...yeni, oncelik: Number(e.target.value) })}
-        >
-          {ONCELIKLER.map((o) => (
-            <option key={o.deger} value={o.deger}>
-              {o.ad}
-            </option>
-          ))}
-        </select>
-        <select
-          title="Tezgah"
-          value={yeni.tezgahId}
-          onChange={(e) =>
-            setYeni({
-              ...yeni,
-              tezgahId: e.target.value,
-              cozguId: "",
-              numuneId: "",
-            })
-          }
-        >
-          <option value="">Tezgah — yok</option>
-          {tezgahlar.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.ad}
-            </option>
-          ))}
-        </select>
-        <select
-          title="Çözgü"
-          value={yeni.cozguId}
-          disabled={!yeni.tezgahId}
-          onChange={(e) =>
-            setYeni({ ...yeni, cozguId: e.target.value, numuneId: "" })
-          }
-        >
-          <option value="">Çözgü — yok</option>
-          {yeniCozguleri.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.adKod}
-            </option>
-          ))}
-        </select>
-        <select
-          title="Numune"
-          value={yeni.numuneId}
-          disabled={!yeni.cozguId}
-          onChange={(e) => setYeni({ ...yeni, numuneId: e.target.value })}
-        >
-          <option value="">Numune — yok</option>
-          {yeniNumuneleri.map((n) => (
-            <option key={n.id} value={n.id}>
-              {n.adKod}
-            </option>
-          ))}
-        </select>
-        <button className="primary" onClick={ekle}>
-          + Ekle
-        </button>
+        <div className="gorev-ekle-satir">
+          <input
+            className="gorev-ekle-baslik"
+            placeholder="Yeni görev…"
+            value={yeni.baslik}
+            onChange={(e) => setYeni({ ...yeni, baslik: e.target.value })}
+            onKeyDown={(e) => e.key === "Enter" && ekle()}
+          />
+          <button
+            className={`gorev-detay-ac${detayAcik ? " aktif" : ""}`}
+            title="Tarih, öncelik ve bağ alanları"
+            onClick={() => setDetayAcik((v) => !v)}
+          >
+            Detay {detayAcik ? "▴" : "▾"}
+          </button>
+          <button className="primary" onClick={ekle}>
+            ＋ Ekle
+          </button>
+        </div>
+
+        {detayAcik && (
+          <div className="gorev-ekle-detay">
+            <label>
+              Son tarih
+              <input
+                type="date"
+                value={yeni.sonTarih}
+                onChange={(e) => setYeni({ ...yeni, sonTarih: e.target.value })}
+              />
+            </label>
+            <label>
+              Öncelik
+              <select
+                value={yeni.oncelik}
+                onChange={(e) =>
+                  setYeni({ ...yeni, oncelik: Number(e.target.value) })
+                }
+              >
+                {ONCELIKLER.map((o) => (
+                  <option key={o.deger} value={o.deger}>
+                    {o.ad}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Tezgah
+              <select
+                value={yeni.tezgahId}
+                onChange={(e) =>
+                  setYeni({
+                    ...yeni,
+                    tezgahId: e.target.value,
+                    cozguId: "",
+                    numuneId: "",
+                  })
+                }
+              >
+                <option value="">— yok —</option>
+                {tezgahlar.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.ad}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Çözgü
+              <select
+                value={yeni.cozguId}
+                disabled={!yeni.tezgahId}
+                onChange={(e) =>
+                  setYeni({ ...yeni, cozguId: e.target.value, numuneId: "" })
+                }
+              >
+                <option value="">— yok —</option>
+                {yeniCozguleri.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.adKod}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Numune
+              <select
+                value={yeni.numuneId}
+                disabled={!yeni.cozguId}
+                onChange={(e) => setYeni({ ...yeni, numuneId: e.target.value })}
+              >
+                <option value="">— yok —</option>
+                {yeniNumuneleri.map((n) => (
+                  <option key={n.id} value={n.id}>
+                    {n.adKod}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        )}
       </div>
 
       {/* Gruplama + filtre */}
@@ -298,6 +336,16 @@ export function Gorevler({ onAc }: Props) {
           />
           Tamamlananları gizle
         </label>
+        {gruplama === "tezgah" && (
+          <label className="gorev-filtre">
+            <input
+              type="checkbox"
+              checked={bosCozguGoster}
+              onChange={(e) => setBosCozguGoster(e.target.checked)}
+            />
+            Boş çözgüleri göster
+          </label>
+        )}
       </div>
 
       {gruplar.length === 0 && (
@@ -323,30 +371,36 @@ export function Gorevler({ onAc }: Props) {
             <div className="gorev-grup-govde">
               {tezgahModu ? (
                 <>
-                  {grupCozguleri.map((cz) => {
-                    const czRootlar = grp.kokler
-                      .filter((r) => r.cozguId === cz.id)
-                      .sort(kokSirala);
-                    return (
-                      <div className="gorev-cozgu-blok" key={cz.id}>
-                        <div className="gorev-cozgu-baslik">
-                          ▤ {cz.adKod}
-                          <span className="mut"> · {czRootlar.length}</span>
+                  {grupCozguleri
+                    .filter(
+                      (cz) =>
+                        bosCozguGoster ||
+                        grp.kokler.some((r) => r.cozguId === cz.id),
+                    )
+                    .map((cz) => {
+                      const czRootlar = grp.kokler
+                        .filter((r) => r.cozguId === cz.id)
+                        .sort(kokSirala);
+                      return (
+                        <div className="gorev-cozgu-blok" key={cz.id}>
+                          <div className="gorev-cozgu-baslik">
+                            ▤ {cz.adKod}
+                            <span className="mut"> · {czRootlar.length}</span>
+                          </div>
+                          {czRootlar.length > 0 ? (
+                            rootlariCiz(czRootlar, { tezgah: true, cozgu: true })
+                          ) : (
+                            <p className="mut gorev-cozgu-bos">görev yok</p>
+                          )}
                         </div>
-                        {czRootlar.length > 0 ? (
-                          rootlariCiz(czRootlar)
-                        ) : (
-                          <p className="mut gorev-cozgu-bos">görev yok</p>
-                        )}
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
                   {cozgusuz.length > 0 && (
                     <div className="gorev-cozgu-blok">
                       <div className="gorev-cozgu-baslik mut">
                         Çözgüsüz (tezgah geneli) · {cozgusuz.length}
                       </div>
-                      {rootlariCiz(cozgusuz)}
+                      {rootlariCiz(cozgusuz, { tezgah: true })}
                     </div>
                   )}
                 </>
