@@ -823,15 +823,6 @@ export function Pano({ onCozguAc }: Props) {
                     hedef === `cz-${c.id}` ? " drop" : ""
                   }${c.durum === "aktif" ? " aktif" : ""}`}
                   onContextMenu={(e) => cozguMenu(c, e)}
-                  draggable
-                  onDragStart={(e) => {
-                    e.stopPropagation();
-                    setSuru({ tip: "cozgu", id: c.id });
-                  }}
-                  onDragEnd={() => {
-                    setSuru(null);
-                    setHedef(null);
-                  }}
                   onDragOver={(e) => {
                     if (suru?.tip === "numune") {
                       e.preventDefault();
@@ -850,6 +841,21 @@ export function Pano({ onCozguAc }: Props) {
                   }}
                 >
                   <div className="kart-baslik">
+                    <span
+                      className="cozgu-tut"
+                      title="Sürükleyerek taşı"
+                      draggable
+                      onDragStart={(e) => {
+                        e.stopPropagation();
+                        setSuru({ tip: "cozgu", id: c.id });
+                      }}
+                      onDragEnd={() => {
+                        setSuru(null);
+                        setHedef(null);
+                      }}
+                    >
+                      ⠿
+                    </span>
                     <button
                       className="katla"
                       title={acik ? "Kapat" : "Aç"}
@@ -866,6 +872,15 @@ export function Pano({ onCozguAc }: Props) {
                       )}
                     </span>
                     <span className="mini-araclar">
+                      <button
+                        className="primary"
+                        title="Hızlı numune ekle"
+                        onClick={(e) =>
+                          hizliNumune(c.id, e.clientX, e.clientY)
+                        }
+                      >
+                        +
+                      </button>
                       <button
                         title="Yukarı"
                         disabled={ci === 0}
@@ -1107,19 +1122,25 @@ function NumuneSatir({
   return (
     <div
       className="numune-satir"
-      draggable
       onContextMenu={onMenu}
       onMouseEnter={(e) => {
         if (aciklamaVar) onIpucu(e);
       }}
       onMouseLeave={onIpucuKapa}
-      onDragStart={(e) => {
-        e.stopPropagation();
-        onIpucuKapa();
-        onSuruBasla();
-      }}
-      onDragEnd={onSuruBitir}
     >
+      <span
+        className="numune-tut"
+        title="Sürükleyerek taşı"
+        draggable
+        onDragStart={(e) => {
+          e.stopPropagation();
+          onIpucuKapa();
+          onSuruBasla();
+        }}
+        onDragEnd={onSuruBitir}
+      >
+        ⠿
+      </span>
       <span
         className="durum-nokta"
         style={{ background: durumRengi(n.durum) }}

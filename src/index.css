@@ -1298,15 +1298,26 @@ select.tasi {
   gap: 8px;
   margin-bottom: 12px;
 }
-.tezgah-tut {
+.tezgah-tut,
+.cozgu-tut,
+.numune-tut {
   cursor: grab;
   color: var(--muted);
   font-size: 1.1rem;
   line-height: 1;
   padding: 0 4px;
   user-select: none;
+  touch-action: none;
+  flex: 0 0 auto;
 }
-.tezgah-tut:active {
+.cozgu-tut,
+.numune-tut {
+  font-size: 0.95rem;
+  padding: 0 3px;
+}
+.tezgah-tut:active,
+.cozgu-tut:active,
+.numune-tut:active {
   cursor: grabbing;
 }
 .plan-tarih {
