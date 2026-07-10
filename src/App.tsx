@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Pano } from "./screens/Pano";
 import { CozguDetay } from "./screens/CozguDetay";
-import { OrguImport } from "./screens/OrguImport";
 import { Gorevler } from "./screens/Gorevler";
 import { Cizelge } from "./screens/Cizelge";
 import { Analiz } from "./screens/Analiz";
@@ -14,7 +13,6 @@ type Gorunum =
   | { ad: "pano" }
   | { ad: "cizelge" }
   | { ad: "analiz" }
-  | { ad: "orguler" }
   | { ad: "gorevler" }
   | {
       ad: "cozgu";
@@ -32,8 +30,6 @@ export default function App() {
         ? "cizelge"
         : gorunum.ad === "analiz"
           ? "analiz"
-          : gorunum.ad === "orguler"
-          ? "orguler"
           : gorunum.ad === "gorevler"
             ? "gorevler"
             : "";
@@ -70,12 +66,6 @@ export default function App() {
         >
           Analiz
         </button>
-        <button
-          className={sekme === "orguler" ? "aktif" : ""}
-          onClick={() => setGorunum({ ad: "orguler" })}
-        >
-          Örgüler
-        </button>
       </nav>
 
       {gorunum.ad === "gorevler" && (
@@ -85,7 +75,6 @@ export default function App() {
           }
         />
       )}
-      {gorunum.ad === "orguler" && <OrguImport />}
 
       {gorunum.ad === "cizelge" && (
         <Cizelge
