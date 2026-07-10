@@ -1742,3 +1742,183 @@ nav.tabs.mini button {
     flex-basis: 87vw;
   }
 }
+
+/* ---------- Analiz (planlama tablosu) ---------- */
+.analiz-arac {
+  align-items: center;
+}
+.analiz-arac-butonlar {
+  margin-left: auto;
+  display: inline-flex;
+  gap: 8px;
+}
+.analiz-arac-butonlar button {
+  font-size: 0.82rem;
+  padding: 6px 12px;
+}
+.analiz-tezgah {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+  break-inside: avoid;
+}
+.analiz-tezgah-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  padding-bottom: 10px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.analiz-tezgah-ad {
+  font-weight: 750;
+  font-size: 1.02rem;
+  letter-spacing: -0.01em;
+}
+.analiz-takim {
+  font-size: 0.8rem;
+  font-weight: 650;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent);
+}
+.analiz-meta {
+  font-size: 0.8rem;
+}
+
+.analiz-tablo-sar {
+  overflow-x: auto;
+}
+.analiz-tablo {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+.analiz-tablo th,
+.analiz-tablo td {
+  padding: 5px 9px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  white-space: nowrap;
+}
+.analiz-tablo thead th {
+  background: var(--surface-2);
+  color: var(--text-soft);
+  font-weight: 650;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  border-bottom: 1px solid var(--border-strong);
+}
+.analiz-tablo .s-sag {
+  text-align: right;
+}
+.analiz-tablo .s-no {
+  width: 30px;
+}
+.analiz-tablo .s-kod {
+  font-weight: 600;
+}
+.analiz-tablo .s-not {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.76rem;
+}
+.analiz-tablo tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--surface-2) 45%, transparent);
+}
+.analiz-tablo tbody tr.tiklanir {
+  cursor: pointer;
+}
+.analiz-tablo tbody tr.tiklanir:hover {
+  background: var(--surface-3);
+}
+.analiz-uyari {
+  color: var(--warn);
+  font-weight: 700;
+}
+.analiz-bos {
+  padding: 10px 9px;
+  font-style: italic;
+}
+.analiz-durum {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.analiz-durum-nokta {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+.analiz-tablo tfoot .analiz-toplam td {
+  font-weight: 700;
+  color: var(--text-soft);
+  border-top: 2px solid var(--border-strong);
+  border-bottom: none;
+  background: var(--surface-2);
+}
+
+/* ---------- Baskı (Yazdır / PDF) ---------- */
+@media print {
+  header.app,
+  nav.tabs,
+  .analiz-arac-butonlar,
+  button {
+    display: none !important;
+  }
+  #root {
+    max-width: none;
+    padding: 0;
+  }
+  body {
+    background: #fff;
+    color: #000;
+  }
+  .analiz-arac strong,
+  .analiz-arac .mut {
+    color: #000;
+  }
+  .analiz-tezgah {
+    background: #fff;
+    border: 1px solid #999;
+    box-shadow: none;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 10px;
+  }
+  .analiz-takim {
+    background: #eee;
+    color: #000;
+    border-color: #999;
+  }
+  .analiz-tablo th,
+  .analiz-tablo td {
+    border-bottom: 1px solid #ccc;
+    color: #000;
+  }
+  .analiz-tablo thead th {
+    background: #eee;
+    color: #000;
+  }
+  .analiz-tablo tbody tr:nth-child(even) {
+    background: #f6f6f6;
+  }
+  .analiz-tablo tfoot .analiz-toplam td {
+    background: #eee;
+    color: #000;
+    border-top: 2px solid #999;
+  }
+  .analiz-uyari {
+    color: #000;
+    text-decoration: underline;
+  }
+}
