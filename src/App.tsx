@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pano } from "./screens/Pano";
 import { CozguDetay } from "./screens/CozguDetay";
 import { Gorevler } from "./screens/Gorevler";
 import { Cizelge } from "./screens/Cizelge";
 import { Analiz } from "./screens/Analiz";
+import { temaOku, temaUygula, type Tema } from "./lib/tema";
 
 // Gezinme:
 // - "pano": ortak tezgah-şerit panosu (Faz 2 ana ekran)
@@ -22,6 +23,21 @@ type Gorunum =
 
 export default function App() {
   const [gorunum, setGorunum] = useState<Gorunum>({ ad: "pano" });
+  const [tema, setTema] = useState<Tema>(temaOku);
+
+  // data-theme'i durumla senkron tut (kalıcılık toggle onClick'inde).
+  useEffect(() => {
+    document.documentElement.setAttribute(
+      "data-theme",
+      tema === "karanlik" ? "dark" : "light",
+    );
+  }, [tema]);
+
+  function temaDegistir() {
+    const yeni: Tema = tema === "karanlik" ? "aydinlik" : "karanlik";
+    temaUygula(yeni);
+    setTema(yeni);
+  }
 
   const sekme =
     gorunum.ad === "pano"
@@ -39,6 +55,16 @@ export default function App() {
       <header className="app">
         <h1>NDP</h1>
         <small>Numune Dokuma Planlama</small>
+        <button
+          className="tema-toggle"
+          onClick={temaDegistir}
+          title={tema === "karanlik" ? "Aydınlık temaya geç" : "Karanlık temaya geç"}
+          aria-label={
+            tema === "karanlik" ? "Aydınlık temaya geç" : "Karanlık temaya geç"
+          }
+        >
+          {tema === "karanlik" ? "☀︎" : "🌙"}
+        </button>
       </header>
 
       <nav className="tabs">

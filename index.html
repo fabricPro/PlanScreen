@@ -24,6 +24,27 @@
       content="black-translucent"
     />
     <meta name="apple-mobile-web-app-title" content="NDP" />
+
+    <!-- Tema: ilk boyadan önce data-theme'i ayarla (FOUC yok). Kayıtlı seçim
+         yoksa cihaz tercihinden türet. -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("ndp-tema");
+          if (t !== "aydinlik" && t !== "karanlik") {
+            t = window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "karanlik"
+              : "aydinlik";
+          }
+          document.documentElement.setAttribute(
+            "data-theme",
+            t === "karanlik" ? "dark" : "light",
+          );
+        } catch (e) {
+          /* yoksay */
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
