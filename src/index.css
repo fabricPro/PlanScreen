@@ -1725,21 +1725,74 @@ nav.tabs.mini button {
 
 /* ---------- Mobil / tablet ---------- */
 @media (max-width: 640px) {
+  :root {
+    --radius: 12px;
+    --radius-md: 9px;
+    --radius-sm: 7px;
+  }
+  body {
+    font-size: 13.5px;
+  }
   #root {
-    padding: 0 14px 44px;
+    padding: 0 12px 40px;
   }
   header.app {
     flex-wrap: wrap;
     gap: 8px;
+    padding: 12px 4px 10px;
+    margin-bottom: 12px;
   }
   header.app h1 {
     font-size: 1.4rem;
   }
   .panel {
-    padding: 17px;
+    padding: 14px;
+  }
+  /* Sekme şeridi: taşma yerine yatay kaydır */
+  nav.tabs {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
+  nav.tabs button {
+    padding: 7px 13px;
+    font-size: 0.84rem;
+    white-space: nowrap;
+    flex: 0 0 auto;
+  }
+  /* Pano: tek kolon, alt alta yığ */
+  .pano {
+    flex-direction: column;
+    overflow-x: visible;
+    gap: 12px;
   }
   .serit {
-    flex-basis: 87vw;
+    flex: 1 1 auto;
+    width: 100%;
+  }
+  /* Analiz tablosu: daha sıkı + Not kolonu gizli (zaten yatay kayar) */
+  .analiz-tablo {
+    font-size: 0.72rem;
+  }
+  .analiz-tablo th,
+  .analiz-tablo td {
+    padding: 4px 6px;
+  }
+  .analiz-tablo .s-not {
+    display: none;
+  }
+  /* Popover: dokunmatikte tam-genişliğe yakın, min-width kısıtı kalksın */
+  .numune-detay {
+    min-width: 0;
+  }
+}
+
+/* Dokunmatik: popover boyutlandırma tutamacı kapalı (drag yeterli) */
+@media (hover: none) {
+  .numune-detay {
+    resize: none;
   }
 }
 
@@ -1920,5 +1973,91 @@ nav.tabs.mini button {
   .analiz-uyari {
     color: #000;
     text-decoration: underline;
+  }
+  .analiz-arsiv,
+  .s-arac {
+    display: none !important;
+  }
+}
+
+/* ---------- Analiz düzenleme + arşiv + çözgü/tezgah pencere ekleri ---------- */
+.analiz-duzenle-dugme {
+  padding: 2px 7px;
+  font-size: 0.78rem;
+  line-height: 1;
+  color: var(--text-soft);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.analiz-duzenle-dugme:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+.analiz-tablo .s-arac {
+  width: 34px;
+  text-align: center;
+}
+.analiz-tezgah-bar .analiz-duzenle-dugme {
+  margin-left: auto;
+}
+
+.analiz-arsiv {
+  margin-top: 18px;
+  border-top: 1px dashed var(--border-strong);
+  padding-top: 10px;
+}
+.analiz-arsiv-baslik {
+  background: transparent;
+  border: none;
+  color: var(--text-soft);
+  font-weight: 650;
+  font-size: 0.9rem;
+  padding: 4px 0;
+}
+.analiz-arsiv-govde {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.analiz-arsiv-satir {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 8px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  opacity: 0.85;
+}
+.analiz-arsiv-satir .analiz-tezgah-ad {
+  font-size: 0.95rem;
+}
+.analiz-arsiv-cikar {
+  margin-left: auto;
+  font-size: 0.8rem;
+  padding: 5px 12px;
+}
+
+/* CozguDuzenle: grid2 içinde tam-genişlik alan (notlar) */
+.grid2-tam {
+  grid-column: 1 / -1;
+}
+
+/* TezgahDuzenle içindeki iplik havuzu bölümü */
+.tezgah-iplikler {
+  margin-top: 4px;
+}
+.tezgah-iplikler > label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: var(--text-soft);
+}
+@media (min-width: 900px) {
+  .tezgah-duzenle .detay-govde > .tezgah-iplikler {
+    grid-column: 1 / -1;
   }
 }

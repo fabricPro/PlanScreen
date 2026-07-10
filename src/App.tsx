@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { Pano } from "./screens/Pano";
-import { TezgahListe } from "./screens/TezgahListe";
-import { TezgahDetay } from "./screens/TezgahDetay";
 import { CozguDetay } from "./screens/CozguDetay";
 import { OrguImport } from "./screens/OrguImport";
 import { Gorevler } from "./screens/Gorevler";
@@ -16,15 +14,11 @@ type Gorunum =
   | { ad: "pano" }
   | { ad: "cizelge" }
   | { ad: "analiz" }
-  | { ad: "liste" }
   | { ad: "orguler" }
   | { ad: "gorevler" }
-  | { ad: "tezgah"; tezgahId: string }
   | {
       ad: "cozgu";
       cozguId: string;
-      geri: "pano" | "tezgah";
-      tezgahId?: string;
       duzenleNumuneId?: string;
     };
 
@@ -42,7 +36,7 @@ export default function App() {
           ? "orguler"
           : gorunum.ad === "gorevler"
             ? "gorevler"
-            : "liste";
+            : "";
 
   return (
     <>
@@ -77,12 +71,6 @@ export default function App() {
           Analiz
         </button>
         <button
-          className={sekme === "liste" ? "aktif" : ""}
-          onClick={() => setGorunum({ ad: "liste" })}
-        >
-          Liste
-        </button>
-        <button
           className={sekme === "orguler" ? "aktif" : ""}
           onClick={() => setGorunum({ ad: "orguler" })}
         >
@@ -93,7 +81,7 @@ export default function App() {
       {gorunum.ad === "gorevler" && (
         <Gorevler
           onAc={(cozguId) =>
-            setGorunum({ ad: "cozgu", cozguId, geri: "pano" })
+            setGorunum({ ad: "cozgu", cozguId })
           }
         />
       )}
@@ -102,7 +90,7 @@ export default function App() {
       {gorunum.ad === "cizelge" && (
         <Cizelge
           onCozguAc={(cozguId) =>
-            setGorunum({ ad: "cozgu", cozguId, geri: "pano" })
+            setGorunum({ ad: "cozgu", cozguId })
           }
         />
       )}
@@ -110,7 +98,7 @@ export default function App() {
       {gorunum.ad === "analiz" && (
         <Analiz
           onCozguAc={(cozguId) =>
-            setGorunum({ ad: "cozgu", cozguId, geri: "pano" })
+            setGorunum({ ad: "cozgu", cozguId })
           }
         />
       )}
@@ -118,28 +106,7 @@ export default function App() {
       {gorunum.ad === "pano" && (
         <Pano
           onCozguAc={(cozguId, duzenleNumuneId) =>
-            setGorunum({ ad: "cozgu", cozguId, geri: "pano", duzenleNumuneId })
-          }
-        />
-      )}
-
-      {gorunum.ad === "liste" && (
-        <TezgahListe
-          onAc={(tezgahId) => setGorunum({ ad: "tezgah", tezgahId })}
-        />
-      )}
-
-      {gorunum.ad === "tezgah" && (
-        <TezgahDetay
-          tezgahId={gorunum.tezgahId}
-          onGeri={() => setGorunum({ ad: "liste" })}
-          onCozguAc={(cozguId) =>
-            setGorunum({
-              ad: "cozgu",
-              cozguId,
-              geri: "tezgah",
-              tezgahId: gorunum.tezgahId,
-            })
+            setGorunum({ ad: "cozgu", cozguId, duzenleNumuneId })
           }
         />
       )}
@@ -148,11 +115,7 @@ export default function App() {
         <CozguDetay
           cozguId={gorunum.cozguId}
           duzenleNumuneId={gorunum.duzenleNumuneId}
-          onGeri={() =>
-            gorunum.geri === "tezgah" && gorunum.tezgahId
-              ? setGorunum({ ad: "tezgah", tezgahId: gorunum.tezgahId })
-              : setGorunum({ ad: "pano" })
-          }
+          onGeri={() => setGorunum({ ad: "pano" })}
         />
       )}
     </>

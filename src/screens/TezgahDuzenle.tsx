@@ -3,6 +3,7 @@ import { tezgahApi } from "../api/client";
 import type { Tezgah } from "../lib/types";
 import { TEZGAH_DURUMLARI } from "../lib/types";
 import { AciklamaEditor } from "./AciklamaEditor";
+import { IplikHavuzu } from "./IplikHavuzu";
 
 interface Props {
   tezgah: Tezgah;
@@ -243,6 +244,11 @@ export function TezgahDuzenle({ tezgah, x, y, onKapat, onKaydedildi }: Props) {
             value={form.aciklama ?? ""}
             onChange={(v) => setForm({ ...form, aciklama: v })}
           />
+        </div>
+
+        <div className="tezgah-iplikler">
+          <label>Denenebilecek iplikler</label>
+          <IplikHavuzu tezgahId={tezgah.id} />
         </div>
       </div>
 

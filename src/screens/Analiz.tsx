@@ -4,6 +4,8 @@ import type { Cozgu, Numune, Tezgah } from "../lib/types";
 import { hesaplaMetraj } from "../lib/metraj";
 import { durumRengi } from "../lib/durum";
 import { tarihKisa } from "../lib/gorev";
+import { CozguDuzenle } from "./CozguDuzenle";
+import { TezgahDuzenle } from "./TezgahDuzenle";
 
 interface Props {
   onCozguAc?: (cozguId: string) => void;
@@ -43,6 +45,17 @@ export function Analiz({ onCozguAc }: Props) {
   const [cozguler, setCozguler] = useState<Cozgu[]>([]);
   const [numuneler, setNumuneler] = useState<Numune[]>([]);
   const [hata, setHata] = useState<string | null>(null);
+  const [cozguDuzenle, setCozguDuzenle] = useState<{
+    cozgu: Cozgu;
+    x: number;
+    y: number;
+  } | null>(null);
+  const [tezgahDuzenle, setTezgahDuzenle] = useState<{
+    tezgah: Tezgah;
+    x: number;
+    y: number;
+  } | null>(null);
+  const [arsivAcik, setArsivAcik] = useState(false);
 
   async function yukle() {
     try {
@@ -106,6 +119,23 @@ export function Analiz({ onCozguAc }: Props) {
   }, [tezgahlar, cozguler, numuneler]);
 
   const bugun = useMemo(() => new Date().toLocaleDateString("tr-TR"), []);
+
+  const arsivliler = useMemo(
+    () =>
+      tezgahlar
+        .filter((t) => t.arsivlendi)
+        .sort((a, b) => a.sira - b.sira || a.ad.localeCompare(b.ad)),
+    [tezgahlar],
+  );
+
+  async function arsivdenCikar(t: Tezgah) {
+    try {
+      await tezgahApi.update(t.id, { arsivlendi: false });
+      await yukle();
+    } catch (e) {
+      setHata((e as Error).message);
+    }
+  }
 
   function csvIndir() {
     const basliklar = [
@@ -212,6 +242,15 @@ export function Analiz({ onCozguAc }: Props) {
                 <span className="badge">📅 {tarihKisa(t.planTarihi)}</span>
               )}
               <span className="badge">{t.durum}</span>
+              <button
+                className="analiz-duzenle-dugme"
+                title="Tezgahı düzenle"
+                onClick={(e) =>
+                  setTezgahDuzenle({ tezgah: t, x: e.clientX, y: e.clientY })
+                }
+              >
+                ✎
+              </button>
             </div>
 
             <div className="analiz-tablo-sar">
@@ -229,13 +268,14 @@ export function Analiz({ onCozguAc }: Props) {
                     <th className="s-sag">Kalan</th>
                     <th className="s-sag">Doluluk</th>
                     <th>Durum</th>
-                    <th>Not</th>
+                    <th className="s-not">Not</th>
+                    <th className="s-arac"></th>
                   </tr>
                 </thead>
                 <tbody>
                   {blok.satirlar.length === 0 ? (
                     <tr>
-                      <td className="mut analiz-bos" colSpan={12}>
+                      <td className="mut analiz-bos" colSpan={13}>
                         çözgü yok
                       </td>
                     </tr>
@@ -270,6 +310,22 @@ export function Analiz({ onCozguAc }: Props) {
                           </span>
                         </td>
                         <td className="s-not mut">{s.c.notlar || ""}</td>
+                        <td className="s-arac">
+                          <button
+                            className="analiz-duzenle-dugme"
+                            title="Çözgüyü düzenle"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCozguDuzenle({
+                                cozgu: s.c,
+                                x: e.clientX,
+                                y: e.clientY,
+                              });
+                            }}
+                          >
+                            ✎
+                          </button>
+                        </td>
                       </tr>
                     ))
                   )}
@@ -283,7 +339,7 @@ export function Analiz({ onCozguAc }: Props) {
                       <td className="s-sag">{num(blok.toplamBoy)}</td>
                       <td colSpan={3}></td>
                       <td className="s-sag">{blok.toplamNumune}</td>
-                      <td colSpan={5}></td>
+                      <td colSpan={6}></td>
                     </tr>
                   </tfoot>
                 )}
@@ -292,6 +348,52 @@ export function Analiz({ onCozguAc }: Props) {
           </div>
         );
       })}
+
+      {arsivliler.length > 0 && (
+        <div className="analiz-arsiv">
+          <button
+            className="analiz-arsiv-baslik"
+            onClick={() => setArsivAcik((v) => !v)}
+          >
+            {arsivAcik ? "▾" : "▸"} Arşivlenenler ({arsivliler.length})
+          </button>
+          {arsivAcik && (
+            <div className="analiz-arsiv-govde">
+              {arsivliler.map((t) => (
+                <div className="analiz-arsiv-satir" key={t.id}>
+                  <span className="analiz-tezgah-ad">{t.ad}</span>
+                  <span className="mut">Takım: {t.takim?.trim() || "—"}</span>
+                  <button
+                    className="analiz-arsiv-cikar"
+                    onClick={() => arsivdenCikar(t)}
+                  >
+                    Arşivden çıkar
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {cozguDuzenle && (
+        <CozguDuzenle
+          cozgu={cozguDuzenle.cozgu}
+          x={cozguDuzenle.x}
+          y={cozguDuzenle.y}
+          onKapat={() => setCozguDuzenle(null)}
+          onKaydedildi={yukle}
+        />
+      )}
+      {tezgahDuzenle && (
+        <TezgahDuzenle
+          tezgah={tezgahDuzenle.tezgah}
+          x={tezgahDuzenle.x}
+          y={tezgahDuzenle.y}
+          onKapat={() => setTezgahDuzenle(null)}
+          onKaydedildi={yukle}
+        />
+      )}
     </div>
   );
 }
