@@ -82,6 +82,7 @@ export function Pano({ onCozguAc }: Props) {
   const [menu, setMenu] = useState<MenuDurum>(null);
   const [hizli, setHizli] = useState<HizliDurum>(null);
   const [acikCozguler, setAcikCozguler] = useState<Set<string>>(new Set());
+  const [tamamGoster, setTamamGoster] = useState(false);
   const [numuneDetay, setNumuneDetay] = useState<{
     numune: Numune;
     x: number;
@@ -475,6 +476,18 @@ export function Pano({ onCozguAc }: Props) {
           etiket: c.durum === "aktif" ? "Pasifleştir" : "Aktif yap (tezgahta)",
           onSec: () => aktifToggle(c),
         },
+        {
+          etiket:
+            c.durum === "tamam"
+              ? "Tamamlandıyı geri al"
+              : "Tamamlandı olarak işaretle",
+          onSec: () =>
+            calis(() =>
+              cozguApi.update(c.id, {
+                durum: c.durum === "tamam" ? "taslak" : "tamam",
+              }),
+            ),
+        },
         { etiket: "Çözgüyü aç / düzenle", onSec: () => onCozguAc(c.id) },
         {
           etiket: "Çözgüyü sil",
@@ -661,6 +674,14 @@ export function Pano({ onCozguAc }: Props) {
         </button>
         <span style={{ flex: 1 }} />
         <button
+          className={`small${tamamGoster ? " aktif" : ""}`}
+          aria-pressed={tamamGoster}
+          title="Tamamlanan (durumu 'tamam') çözgüleri göster/gizle"
+          onClick={() => setTamamGoster((v) => !v)}
+        >
+          {tamamGoster ? "✓ Tamamlananlar açık" : "Tamamlananları göster"}
+        </button>
+        <button
           className="small"
           onClick={() => hepsiniAc(cozguler.map((c) => c.id))}
         >
@@ -676,7 +697,14 @@ export function Pano({ onCozguAc }: Props) {
           <p className="mut">Panoda tezgah yok. "+ Tezgah" ile ekleyin.</p>
         )}
         {gorunenTezgahlar.map((t) => {
-        const kolonCozguleri = cozgulerinTezgahi(t.id);
+        const tumKolonCozguleri = cozgulerinTezgahi(t.id);
+        // Tamamlananları (durum "tamam") varsayılan gizle; anahtar açıksa göster.
+        const kolonCozguleri = tumKolonCozguleri.filter(
+          (c) => tamamGoster || c.durum !== "tamam",
+        );
+        const gizliTamam = tamamGoster
+          ? 0
+          : tumKolonCozguleri.length - kolonCozguleri.length;
         const kolonIplikleri = iplikHaritasi.get(t.id) ?? [];
         const tGorev = gorevler.filter((g) => g.tezgahId === t.id);
         const acikGorev = tGorev.filter((g) => !g.tamamlandi).length;
@@ -742,8 +770,11 @@ export function Pano({ onCozguAc }: Props) {
                 flexWrap: "wrap",
               }}
             >
-              {kolonCozguleri.length} çözgü · {t.cerceveSayisi}çrç ·{" "}
-              {t.mekikSayisi}mkk
+              {kolonCozguleri.length} çözgü
+              {gizliTamam > 0 && (
+                <span className="mut"> · {gizliTamam} tamam gizli</span>
+              )}{" "}
+              · {t.cerceveSayisi}çrç · {t.mekikSayisi}mkk
               {t.aciklama && t.aciklama.trim() && (
                 <span
                   className="aciklama-im"
@@ -821,7 +852,9 @@ export function Pano({ onCozguAc }: Props) {
                   key={c.id}
                   className={`cozgu-kart${
                     hedef === `cz-${c.id}` ? " drop" : ""
-                  }${c.durum === "aktif" ? " aktif" : ""}`}
+                  }${c.durum === "aktif" ? " aktif" : ""}${
+                    c.durum === "tamam" ? " tamam" : ""
+                  }`}
                   onContextMenu={(e) => cozguMenu(c, e)}
                   onDragOver={(e) => {
                     if (suru?.tip === "numune") {
@@ -868,6 +901,11 @@ export function Pano({ onCozguAc }: Props) {
                       {c.durum === "aktif" && (
                         <span className="aktif-rozet" style={{ marginLeft: 6 }}>
                           AKTİF
+                        </span>
+                      )}
+                      {c.durum === "tamam" && (
+                        <span className="tamam-rozet" style={{ marginLeft: 6 }}>
+                          TAMAM
                         </span>
                       )}
                     </span>

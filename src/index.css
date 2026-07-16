@@ -1448,6 +1448,30 @@ select.tasi {
   padding: 2px 7px;
   border-radius: 999px;
 }
+/* Tamamlanan çözgü — soluk kart + yeşil "TAMAM" rozeti */
+.cozgu-kart.tamam {
+  opacity: 0.66;
+}
+.cozgu-kart.tamam::before {
+  background: var(--ok);
+  width: 5px;
+}
+.tamam-rozet {
+  font-size: 0.62rem;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  color: var(--ok);
+  background: color-mix(in srgb, var(--ok) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ok) 45%, transparent);
+  padding: 1px 7px;
+  border-radius: 999px;
+}
+/* Araç çubuğu toggle — aktif durum vurgusu */
+.pano-arac .small.aktif {
+  color: var(--primary);
+  border-color: color-mix(in srgb, var(--primary) 45%, transparent);
+  background: var(--primary-soft);
+}
 
 /* ---------- Görev (to-do) ağacı ---------- */
 .gorev-dugum {
